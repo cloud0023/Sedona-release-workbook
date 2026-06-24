@@ -214,7 +214,7 @@ function splitEntries(value = "") {
 }
 
 function recordItems(record) {
-  if (Array.isArray(record.items) && record.items.length) return record.items;
+  if (Array.isArray(record.items) && record.items.length) return record.items.filter((item) => item.text || item.id);
   if (record.feeling) return [{ id: `${record.id}-legacy`, text: record.feeling, released: Boolean(record.released) }];
   return [];
 }
@@ -466,7 +466,7 @@ function topicDetailView() {
       <section>
         <div class="section-heading-row">
           <h2 class="section-title">释放记录</h2>
-          <button class="icon-btn add-record-btn" data-action="open-topic-form" aria-label="新增释放记录">＋</button>
+          <button class="icon-btn add-record-btn" data-action="create-empty-topic-record" data-topic="${topic.id}" aria-label="新增释放记录">＋</button>
         </div>
         ${records.length ? topicRecordsBrowser(topic, records, selected) : `<div class="empty">还没有记录。先写下一项，再逐个勾选释放结果。</div>`}
       </section>
@@ -1113,10 +1113,27 @@ app.addEventListener("click", async (event) => {
       if (checkbox) checkbox.checked = false;
     }
   }
-  if (name === "open-topic-form") {
-    const form = document.querySelector('[data-form="topic-record"]');
-    form?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => form?.querySelector("textarea, input")?.focus(), 220);
+  if (name === "create-empty-topic-record") {
+    const topic = getTopic(action.dataset.topic);
+    const record = {
+      id: uid("topic"),
+      topicId: topic.id,
+      column: topic.columns?.[0] || "",
+      subject: "",
+      feeling: "",
+      items: [{ id: uid("item"), text: "", released: false }],
+      gain: "",
+      goalId: "",
+      released: false,
+      feelsGood: false,
+      createdAt: nowIso(),
+      updatedAt: nowIso()
+    };
+    await putStore("topicRecords", record);
+    await loadData();
+    state.selectedTopicRecordId = record.id;
+    render();
+    window.setTimeout(() => document.querySelector('[data-form="update-topic-record"] textarea[name="subject"]')?.focus(), 80);
   }
   if (name === "cancel-release-setup") {
     state.releaseSetup = null;
