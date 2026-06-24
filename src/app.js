@@ -166,6 +166,7 @@ const state = {
   route: "home",
   topicId: null,
   selectedTopicRecordId: null,
+  releaseSetup: null,
   sessionId: null,
   release: null,
   toast: "",
@@ -248,6 +249,7 @@ function makeReleaseTableRow(label = "") {
     <div class="release-table-row">
       <input name="itemText" placeholder="${label}" />
       <label class="mini-check"><input type="checkbox" name="itemReleased" /><span>✓</span></label>
+      <button class="row-delete-btn" type="button" data-action="remove-topic-form-row" aria-label="删除这一行">×</button>
     </div>
   `;
 }
@@ -462,7 +464,10 @@ function topicDetailView() {
       </section>
       ${topicForm(topic)}
       <section>
-        <h2 class="section-title">释放记录</h2>
+        <div class="section-heading-row">
+          <h2 class="section-title">释放记录</h2>
+          <button class="icon-btn add-record-btn" data-action="open-topic-form" aria-label="新增释放记录">＋</button>
+        </div>
         ${records.length ? topicRecordsBrowser(topic, records, selected) : `<div class="empty">还没有记录。先写下一项，再逐个勾选释放结果。</div>`}
       </section>
     </main>
@@ -491,10 +496,12 @@ function topicForm(topic) {
         <div class="release-table-head">
           <span>${feelingLabel(topic)}</span>
           <span>释放了吗</span>
+          <span></span>
         </div>
         <div class="release-table-row">
           <input name="itemText" required placeholder="${feelingPlaceholder(topic)}" />
           <label class="mini-check"><input type="checkbox" name="itemReleased" value="0" /><span>✓</span></label>
+          <button class="row-delete-btn" type="button" data-action="remove-topic-form-row" aria-label="删除这一行">×</button>
         </div>
       </div>
       <button class="soft-btn" type="button" data-action="add-topic-form-row">添加一种${fieldName(topic)}</button>
@@ -570,12 +577,14 @@ function topicRecordDetail(topic, record) {
         <div class="release-table-head">
           <span>${feelingLabel(topic)}</span>
           <span>释放了吗</span>
+          <span></span>
         </div>
         ${items.length ? items.map((item) => `
           <div class="release-table-row">
             <input type="hidden" name="itemId" value="${escapeHtml(item.id)}" />
             <input name="itemText" value="${escapeHtml(item.text)}" placeholder="${fieldName(topic)}" />
             <label class="mini-check"><input type="checkbox" name="itemReleased" value="${escapeHtml(item.id)}" ${item.released ? "checked" : ""} /><span>✓</span></label>
+            <button class="row-delete-btn" type="button" data-action="remove-topic-form-row" aria-label="删除这一行">×</button>
           </div>
         `).join("") : `<div class="empty">还没有${topic.type === "want" ? "想要" : "感受"}。</div>`}
       </div>
@@ -607,14 +616,6 @@ function releaseStartView() {
         <span class="eyebrow">Guided release</span>
         <h1 class="screen-title">开始释放</h1>
       </div>
-      ${inProgress.length ? `
-        <section>
-          <h2 class="section-title">进行中</h2>
-          <div class="record-list">
-            ${inProgress.map(sessionCard).join("")}
-          </div>
-        </section>
-      ` : ""}
       <section class="panel">
         <h2 class="section-title">主题释放</h2>
         <p>按练习本主题自动决定释放情绪还是释放想要。</p>
@@ -643,6 +644,41 @@ function releaseStartView() {
         </div>
         <button class="primary-btn" type="submit">进入引导</button>
       </form>
+      ${inProgress.length ? `
+        <section>
+          <h2 class="section-title">进行中</h2>
+          <div class="record-list">
+            ${inProgress.map(sessionCard).join("")}
+          </div>
+        </section>
+      ` : ""}
+    </main>
+  `);
+}
+
+function releaseSetupView() {
+  const setup = state.releaseSetup;
+  if (!setup) return releaseStartView();
+  const topic = getTopic(setup.topicId);
+  const isSubjectStep = setup.step === "subject";
+  return appFrame(`
+    <main class="release-stage">
+      <div>
+        <span class="eyebrow">${topic.title} · ${modeLabel(topic.type)}</span>
+        <h1 class="screen-title">主题释放</h1>
+      </div>
+      <form class="prompt-card" data-form="${isSubjectStep ? "release-setup-subject" : "release-setup-feeling"}">
+        <input type="hidden" name="topicId" value="${topic.id}" />
+        <span class="meta">${isSubjectStep ? "第一步" : "第二步"}</span>
+        <p class="prompt-text">${isSubjectStep ? topic.fields[0] : feelingLabel(topic)}</p>
+        ${isSubjectStep
+          ? `<textarea name="subject" required placeholder="写下这次具体释放的内容">${escapeHtml(setup.subject || "")}</textarea>`
+          : `<input name="feeling" required placeholder="${topic.type === "want" ? "现在最明显的想要是什么？" : "现在最明显的感受是什么？"}" />`}
+        <button class="primary-btn" type="submit">${isSubjectStep ? "下一步" : "进入引导"}</button>
+      </form>
+      <div class="action-row">
+        <button class="soft-btn" data-action="cancel-release-setup">取消</button>
+      </div>
     </main>
   `);
 }
@@ -902,6 +938,7 @@ function render() {
     topics: topicsView,
     topicDetail: topicDetailView,
     releaseStart: releaseStartView,
+    releaseSetup: releaseSetupView,
     release: releaseView,
     gains: gainsView,
     goals: goalsView
@@ -1028,6 +1065,7 @@ async function pauseRelease() {
 function handleBack() {
   if (state.route === "home") return;
   if (state.route === "topicDetail") return setRoute("topics");
+  if (state.route === "releaseSetup") return setRoute("releaseStart", { releaseSetup: null });
   if (state.route === "release") return pauseRelease();
   setRoute("home");
 }
@@ -1049,8 +1087,8 @@ app.addEventListener("click", async (event) => {
   if (name === "start-selected-topic") {
     const select = document.querySelector("#topicSelect");
     const topic = getTopic(select.value);
-    state.dialog = { type: "start-topic-release", topicId: topic.id };
-    render();
+    state.releaseSetup = { topicId: topic.id, step: "subject", subject: "" };
+    setRoute("releaseSetup");
   }
   if (name === "close-dialog") {
     state.dialog = null;
@@ -1061,6 +1099,28 @@ app.addEventListener("click", async (event) => {
     const topic = getTopic(form?.querySelector('input[name="topicId"]')?.value) || getTopic(state.topicId) || TOPICS[0];
     const table = form?.querySelector("[data-release-table]");
     if (table) table.insertAdjacentHTML("beforeend", makeReleaseTableRow(fieldName(topic)));
+  }
+  if (name === "remove-topic-form-row") {
+    const row = action.closest(".release-table-row");
+    const table = action.closest("[data-release-table]");
+    const rows = table ? [...table.querySelectorAll(".release-table-row")] : [];
+    if (row && rows.length > 1) {
+      row.remove();
+    } else if (row) {
+      const input = row.querySelector('input[name="itemText"]');
+      const checkbox = row.querySelector('input[name="itemReleased"]');
+      if (input) input.value = "";
+      if (checkbox) checkbox.checked = false;
+    }
+  }
+  if (name === "open-topic-form") {
+    const form = document.querySelector('[data-form="topic-record"]');
+    form?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => form?.querySelector("textarea, input")?.focus(), 220);
+  }
+  if (name === "cancel-release-setup") {
+    state.releaseSetup = null;
+    setRoute("releaseStart");
   }
   if (name === "answer-prompt") {
     state.release.promptAnswers.push({
@@ -1225,6 +1285,43 @@ app.addEventListener("submit", async (event) => {
       source: "topic-record",
       topicId: topic.id,
       subject: data.subject,
+      releaseType: topic.type,
+      feeling: data.feeling,
+      recordId: record.id
+    });
+  }
+
+  if (form.dataset.form === "release-setup-subject") {
+    const topic = getTopic(data.topicId);
+    state.releaseSetup = { topicId: topic.id, step: "feeling", subject: data.subject };
+    render();
+  }
+
+  if (form.dataset.form === "release-setup-feeling") {
+    const topic = getTopic(data.topicId);
+    const subject = state.releaseSetup?.subject || topic.title;
+    const record = {
+      id: uid("topic"),
+      topicId: topic.id,
+      column: "",
+      subject,
+      feeling: data.feeling,
+      items: [{ id: uid("item"), text: data.feeling, released: false }],
+      gain: "",
+      goalId: "",
+      released: false,
+      feelsGood: false,
+      createdAt: nowIso(),
+      updatedAt: nowIso()
+    };
+    await putStore("topicRecords", record);
+    state.selectedTopicRecordId = record.id;
+    state.releaseSetup = null;
+    await loadData();
+    await createSession({
+      source: "topic-record",
+      topicId: topic.id,
+      subject,
       releaseType: topic.type,
       feeling: data.feeling,
       recordId: record.id

@@ -266,6 +266,23 @@ button {
   font-size: 1.28rem;
 }
 
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.section-heading-row .section-title {
+  margin: 0 0 var(--space-sm);
+}
+
+.add-record-btn {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
 .panel,
 .form-card {
   display: grid;
@@ -548,7 +565,7 @@ select:focus {
 .release-table-head,
 .release-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px;
+  grid-template-columns: minmax(0, 1fr) 72px 40px;
   gap: var(--space-sm);
   align-items: center;
 }
@@ -572,6 +589,10 @@ select:focus {
 .mini-check input,
 .record-good-toggle input {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: 0;
   opacity: 0;
   pointer-events: none;
 }
@@ -590,6 +611,20 @@ select:focus {
   color: var(--surface);
   background: var(--teal);
   border-color: var(--teal);
+}
+
+.row-delete-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-height: 36px;
+  padding: 0;
+  color: oklch(38% 0.11 25);
+  background: color-mix(in oklch, var(--rose) 18%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--rose) 34%, var(--line));
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 900;
 }
 
 .release-item-list {
