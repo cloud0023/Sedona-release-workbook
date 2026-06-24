@@ -1,0 +1,10 @@
+{
+  "name": "sedona-workbook-pwa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python -m http.server 4173",
+    "test:smoke": "node scripts/smoke-test.mjs"
+  }
+}
