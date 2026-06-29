@@ -224,6 +224,7 @@ const state = {
   route: "home",
   topicId: null,
   selectedTopicRecordId: null,
+  topicRecordMode: "list",
   releaseSetup: null,
   sessionId: null,
   release: null,
@@ -485,7 +486,7 @@ function makeCardRow(topic, namePrefix, card = null) {
     <div class="release-table-row" data-card-row>
       <input type="hidden" name="${namePrefix}CardId" value="${escapeHtml(id)}" />
       <input name="${namePrefix}CardText" value="${escapeHtml(card?.text || "")}" placeholder="${fieldName(topic)}" />
-      <label class="mini-check"><input type="checkbox" name="${namePrefix}CardReleased" value="${escapeHtml(id || "new")}" ${card?.released ? "checked" : ""} /><span>✓</span></label>
+      <label class="mini-check"><input type="checkbox" name="${namePrefix}CardReleased" value="${escapeHtml(id || "new")}" ${card?.released ? "checked" : ""} /><span>✓</span><b>释放了吗</b></label>
       <button class="row-delete-btn" type="button" data-action="remove-structured-card-row" aria-label="删除这一行">×</button>
     </div>
   `;
@@ -667,13 +668,13 @@ function recordMarkdown(record) {
   );
   const sectionLines = isV2Record(record)
     ? record.sections.flatMap((section) => {
-        const lines = [`## ${markdownEscape(section.title)}`, "", `- 感觉好了吗：${section.feelsGood ? "是" : "否"}`];
+        const lines = [`## ${markdownEscape(section.title)}`, "", `- 感觉好吗：${section.feelsGood ? "是" : "否"}`];
         if ((section.cards || []).length) {
           lines.push("", ...(section.cards.map((card) => `- [${card.released ? "x" : " "}] ${markdownEscape(card.text)}`)));
         }
         if ((section.groups || []).length) {
           for (const group of section.groups) {
-            lines.push("", `### ${markdownEscape(group.text || "未填写")}`, "", `- 感觉好了吗：${group.feelsGood ? "是" : "否"}`);
+            lines.push("", `### ${markdownEscape(group.text || "未填写")}`, "", `- 感觉好吗：${group.feelsGood ? "是" : "否"}`);
             lines.push(...((group.cards || []).map((card) => `- [${card.released ? "x" : " "}] ${markdownEscape(card.text)}`)));
           }
         }
@@ -689,7 +690,7 @@ function recordMarkdown(record) {
     `- 类型：${modeLabel(topic.type)}`,
     `- 创建时间：${record.createdAt || ""}`,
     `- 更新时间：${record.updatedAt || ""}`,
-    `- 感觉好了吗：${recordIsGood(record) ? "是" : "否"}`,
+    `- 感觉好吗：${recordIsGood(record) ? "是" : "否"}`,
     "",
     ...sectionLines,
     "",
@@ -701,7 +702,7 @@ function recordMarkdown(record) {
           "",
           ...((round.promptAnswers || []).map((answer) => `- ${markdownEscape(answer.prompt)}：${markdownEscape(answer.answer)}`)),
           `- 释放了吗：${round.released ? "是" : "否"}`,
-          `- 感觉好了吗：${round.feelsGood ? "是" : "否"}`,
+          `- 感觉好吗：${round.feelsGood ? "是" : "否"}`,
           ""
         ].join("\n"))
       : ["暂无引导轮次。"]),
@@ -1003,17 +1004,48 @@ function topicDetailView() {
 
 function structuredFields(topic, record) {
   const structure = topicStructure(topic);
+  const useTabs = structure.sections.length > 1;
   return `
-    <div class="structured-editor">
-      ${record.sections.map((section) => structuredSectionFields(topic, structure, section)).join("")}
+    <div class="structured-editor ${useTabs ? "tabbed-structured-editor" : ""}">
+      ${useTabs ? `
+        <div class="structured-tabs" role="tablist" aria-label="释放记录分区">
+          ${record.sections.map((section, index) => `
+            <button class="structured-tab ${index === 0 ? "active" : ""}" type="button" role="tab" aria-selected="${index === 0 ? "true" : "false"}" data-action="switch-structured-section-tab" data-section-id="${escapeHtml(section.id)}">${escapeHtml(sectionTabLabel(structure, section))}</button>
+          `).join("")}
+        </div>
+      ` : ""}
+      <div class="${useTabs ? "structured-tab-panels" : "structured-sections"}">
+        ${record.sections.map((section, index) => structuredSectionFields(topic, structure, section, { tabbed: useTabs, active: index === 0 })).join("")}
+      </div>
     </div>
   `;
 }
 
-function structuredSectionFields(topic, structure, section) {
+function sectionTabLabel(structure, section) {
+  const labels = {
+    success: "成功",
+    failure: "失败",
+    likes: "喜欢",
+    dislikes: "不喜欢",
+    benefits: "好处",
+    harms: "坏处",
+    "goal-feelings": "目标感受",
+    "goal-actions": "行动"
+  };
+  return labels[section.key] || section.title || structure.title || "分区";
+}
+
+function addGroupButtonLabel(structure, section) {
+  if (structure.type === "likes-dislikes") return section.key === "likes" ? "添加喜欢的方面" : "添加不喜欢的方面";
+  if (structure.type === "stuckness") return section.key === "benefits" ? "添加好处" : "添加坏处";
+  if (structure.type === "goal") return "添加行动";
+  return `添加${sectionTabLabel(structure, section)}`;
+}
+
+function structuredSectionFields(topic, structure, section, options = {}) {
   const grouped = sectionCanHaveGroups(structure, section.key);
   return `
-    <section class="structured-section" data-section-id="${escapeHtml(section.id)}" data-section-key="${escapeHtml(section.key)}">
+    <section class="structured-section ${options.tabbed ? "structured-tab-panel" : ""} ${options.active ? "active" : ""}" data-section-id="${escapeHtml(section.id)}" data-section-key="${escapeHtml(section.key)}" ${options.tabbed && !options.active ? "hidden" : ""}>
       <header class="structured-section-head">
         <h3>${escapeHtml(section.title)}</h3>
         ${grouped ? "" : goodToggle(`section-${section.id}FeelsGood`, section.feelsGood)}
@@ -1030,7 +1062,7 @@ function groupedSectionFields(topic, structure, section) {
       ${(section.groups || []).map((group) => structuredGroupFields(topic, section, group, definition)).join("")}
       ${!(section.groups || []).length ? structuredGroupFields(topic, section, makeGroup("", [makeCard(topic)]), definition) : ""}
     </div>
-    <button class="soft-btn" type="button" data-action="add-structured-group">${definition?.groupPrompt || structure.groupLabel || "分区"}</button>
+    <button class="soft-btn" type="button" data-action="add-structured-group">${addGroupButtonLabel(structure, section)}</button>
   `;
 }
 
@@ -1062,7 +1094,7 @@ function directCardsFields(topic, prefix, cards) {
       </div>
       ${rows.map((card) => makeCardRow(topic, prefix, card)).join("")}
     </div>
-    <button class="soft-btn" type="button" data-action="add-structured-card-row">添加一种${fieldName(topic)}</button>
+    <button class="soft-btn" type="button" data-action="add-structured-card-row">添加${fieldName(topic)}</button>
   `;
 }
 
@@ -1070,7 +1102,7 @@ function goodToggle(name, checked) {
   return `
     <label class="record-good-toggle">
       <span class="box-mark">${checked ? "✓" : ""}</span>
-      <span>感觉好了吗？</span>
+      <span>感觉好吗？</span>
       <input type="checkbox" name="${escapeHtml(name)}" ${checked ? "checked" : ""} />
     </label>
   `;
@@ -1164,15 +1196,16 @@ function topicForm(topic) {
 }
 
 function topicRecordsBrowser(topic, records, selected) {
+  const mode = state.topicRecordMode === "detail" ? "detail-mode" : "list-mode";
   return `
-    <div class="record-browser">
+    <div class="record-browser ${mode}">
       <div class="record-master" aria-label="释放目标列表">
         ${records.map((record) => `
           <button class="record-master-item ${selected?.id === record.id ? "active" : ""}" data-action="select-topic-record" data-record="${record.id}">
-            <span class="box-mark">${recordIsGood(record) ? "✓" : ""}</span>
-            <span>
+            <span class="box-mark record-status-box" aria-label="${recordIsGood(record) ? "感觉好" : "感觉未好"}">${recordIsGood(record) ? "✓" : ""}</span>
+            <span class="record-master-copy">
               <strong>${escapeHtml(record.subject || "未命名释放")}</strong>
-              <small>${summarizeStructuredRecord(record).map(escapeHtml).join(" / ")} · ${formatDate(record.createdAt)}</small>
+              <small>${formatDate(record.createdAt)}</small>
             </span>
           </button>
         `).join("")}
@@ -1189,6 +1222,7 @@ function topicRecordDetail(topic, record) {
   const effectiveTopic = record.releaseType ? { ...topic, type: record.releaseType } : topic;
   return `
     <form class="record-detail-card" data-form="update-topic-record" data-record="${record.id}">
+      <button class="soft-btn mobile-only" type="button" data-action="back-to-record-list">返回记录列表</button>
       <header>
         <div class="field compact-field">
           <label>${topic.fields[0]}</label>
@@ -1857,7 +1891,7 @@ app.addEventListener("click", async (event) => {
   if (backButton) handleBack();
 
   const topicButton = event.target.closest("[data-topic]");
-  if (topicButton) setRoute("topicDetail", { topicId: topicButton.dataset.topic });
+  if (topicButton) setRoute("topicDetail", { topicId: topicButton.dataset.topic, topicRecordMode: "list" });
 
   const action = event.target.closest("[data-action]");
   if (!action) return;
@@ -1945,6 +1979,20 @@ app.addEventListener("click", async (event) => {
     const definition = topicStructure(topic).sections.find((item) => item.key === sectionKey);
     if (groupList) groupList.insertAdjacentHTML("beforeend", structuredGroupFields(topic, { id: section.dataset.sectionId }, makeGroup("", [makeCard(topic)]), definition));
   }
+  if (name === "switch-structured-section-tab") {
+    const editor = action.closest(".tabbed-structured-editor");
+    const targetId = action.dataset.sectionId;
+    editor?.querySelectorAll(".structured-tab").forEach((tab) => {
+      const active = tab.dataset.sectionId === targetId;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    editor?.querySelectorAll(".structured-tab-panel").forEach((panel) => {
+      const active = panel.dataset.sectionId === targetId;
+      panel.classList.toggle("active", active);
+      panel.hidden = !active;
+    });
+  }
   if (name === "remove-structured-group") {
     const group = action.closest(".structured-group");
     const list = group?.parentElement;
@@ -1964,6 +2012,7 @@ app.addEventListener("click", async (event) => {
     await putStore("topicRecords", record);
     await loadData();
     state.selectedTopicRecordId = record.id;
+    state.topicRecordMode = "detail";
     render();
     window.setTimeout(() => document.querySelector('[data-form="update-topic-record"] textarea[name="subject"]')?.focus(), 80);
   }
@@ -2055,11 +2104,20 @@ app.addEventListener("click", async (event) => {
   }
   if (name === "select-topic-record") {
     state.selectedTopicRecordId = action.dataset.record;
+    state.topicRecordMode = "detail";
+    render();
+  }
+  if (name === "back-to-record-list") {
+    state.topicRecordMode = "list";
     render();
   }
   if (name === "delete-record") {
+    const record = state.data.topicRecords.find((item) => item.id === action.dataset.record);
+    if (!window.confirm(`删除「${record?.subject || "未命名释放"}」这条释放记录？删除后无法恢复。`)) return;
     await deleteStore("topicRecords", action.dataset.record);
     await loadData();
+    state.selectedTopicRecordId = null;
+    state.topicRecordMode = "list";
     render();
   }
   if (name === "delete-gain") {

@@ -998,6 +998,10 @@ select:focus {
   display: block;
 }
 
+.record-master-copy {
+  min-width: 0;
+}
+
 .record-master-item strong {
   line-height: 1.28;
 }
@@ -1041,6 +1045,10 @@ select:focus {
   gap: var(--space-md);
 }
 
+.mobile-only {
+  display: none;
+}
+
 .record-detail-card header {
   display: grid;
   gap: var(--space-xs);
@@ -1067,6 +1075,38 @@ select:focus {
 .structured-group {
   display: grid;
   gap: var(--space-md);
+}
+
+.structured-tab-panels,
+.structured-sections {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.structured-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: var(--space-xs);
+  padding: 4px;
+  background: color-mix(in oklch, var(--paper-deep) 42%, var(--surface));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.structured-tab {
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  font-weight: 900;
+}
+
+.structured-tab.active {
+  color: var(--teal-dark);
+  background: color-mix(in oklch, var(--gold) 34%, var(--surface));
+  box-shadow: 0 1px 0 color-mix(in oklch, var(--gold) 48%, transparent);
 }
 
 .structured-section {
@@ -1122,6 +1162,10 @@ select:focus {
   display: grid;
   place-items: center;
   min-height: 46px;
+}
+
+.mini-check b {
+  display: none;
 }
 
 .mini-check input,
@@ -1326,17 +1370,127 @@ select:focus {
   }
 
   .record-browser {
-    grid-template-columns: minmax(128px, 0.42fr) minmax(0, 0.58fr);
+    display: block;
+    min-height: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .record-browser.list-mode .record-detail,
+  .record-browser.detail-mode .record-master {
+    display: none;
   }
 
   .record-master,
   .record-detail {
-    max-height: 460px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .record-master {
+    gap: var(--space-sm);
+    padding: 0;
+    background: transparent;
+    border-right: 0;
+  }
+
+  .record-detail {
+    padding: 0;
   }
 
   .record-master-item {
-    grid-template-columns: 20px 1fr;
-    padding: var(--space-sm) var(--space-xs);
+    grid-template-columns: 34px 1fr;
+    gap: var(--space-md);
+    min-height: 72px;
+    padding: var(--space-md);
+    background: color-mix(in oklch, var(--surface) 92%, var(--paper));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 24px oklch(32% 0.04 90 / 0.08);
+  }
+
+  .record-master-item.active {
+    background: color-mix(in oklch, var(--gold) 20%, var(--surface));
+  }
+
+  .record-master-item .box-mark {
+    width: 28px;
+    height: 28px;
+    margin-top: 1px;
+  }
+
+  .record-master-item strong {
+    font-size: 1rem;
+  }
+
+  .record-master-item small {
+    margin-top: 6px;
+    font-size: 0.84rem;
+  }
+
+  .mobile-only {
+    display: inline-grid;
+    justify-self: start;
+  }
+
+  .structured-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .structured-section,
+  .structured-group {
+    padding: var(--space-md);
+  }
+
+  .release-table-head {
+    display: none;
+  }
+
+  .release-table-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "text text"
+      "check delete";
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: color-mix(in oklch, var(--surface) 94%, var(--paper-deep));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .release-table-row input[name$="CardText"] {
+    grid-area: text;
+  }
+
+  .release-table-row .mini-check {
+    grid-area: check;
+    grid-template-columns: 34px auto;
+    justify-content: start;
+    gap: var(--space-sm);
+    min-height: 44px;
+    padding: 0 var(--space-sm) 0 0;
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .release-table-row .mini-check b {
+    display: block;
+    font-size: 0.9rem;
+  }
+
+  .release-table-row .row-delete-btn {
+    grid-area: delete;
+    justify-self: end;
+  }
+
+  .structured-group-actions {
+    grid-template-columns: 1fr 44px;
   }
 }
 
