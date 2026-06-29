@@ -33,17 +33,26 @@
 
 ## 本地运行
 
+### PC端
 ```powershell
-node scripts/static-server.mjs
+cd C:\Users\sunyue\Desktop\Codex\释放法练习本
+npm start
 ```
 
 然后打开：
 
 ```text
-http://127.0.0.1:4173/index.html?v=6
+http://127.0.0.1:4173/index.html?v=10
 ```
 
 如果浏览器缓存旧版本，更新 `index.html` 里的资源版本号，以及 `service-worker.js` 里的 `CACHE_NAME`。
+
+### 手机端
+
+ cd C:\Users\sunyue\Desktop\Codex\释放法练习本
+python -m http.server 4173 --bind 192.168.1.9
+
+http://192.168.1.9:4173/index.html?v=10
 
 ## GitHub Pages 部署步骤
 

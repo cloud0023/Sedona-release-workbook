@@ -27,56 +27,56 @@ const FREE_RELEASE_TOPIC = {
 const EMOTION_GROUPS = [
   {
     name: "万念俱灰",
-    icon: "☔",
+    icon: "灰",
     tone: "无望、能量低落",
     children: ["无聊", "不能赢", "担心大意", "冷淡", "停止", "死亡", "被打败", "沮丧", "泄气", "凄惨", "绝望", "气馁", "幻想破灭", "精疲力竭", "失败", "可遗忘的", "没出息", "放弃", "冷酷无情的", "没有希望", "没有幽默感", "我不行", "我不在乎", "我没有价值", "漫不经心", "优柔寡断", "冷漠", "没有存在感", "太晚了", "懊悔", "再等等吧", "无精打采", "失败者", "消极", "麻木不仁", "击溃", "无能为力", "认命", "震惊", "漫不经意", "停滞不前", "太累", "冷酷无情", "漫无目的", "没用", "模糊不清", "废品", "有什么用呢", "为什么要试呢", "不值得"]
   },
   {
     name: "悲苦",
-    icon: "🌧",
-    tone: "伤心、难过、失落痛苦",
+    icon: "悲",
+    tone: "伤心、失落痛苦",
     children: ["被遗弃", "被羞辱", "被控告", "极度痛苦", "丢脸", "被背叛", "忧郁", "被欺骗", "绝望", "失望", "心烦意乱", "尴尬的", "被忘掉", "愧疚的", "心碎的", "头痛", "泪丧", "无助的", "受伤", "要是早就好了", "被忽视的", "不够", "伤心欲绝", "不公平", "被遗忘", "极度渴望", "损失", "衰愁", "被误解", "哀悼", "被忽略", "没人关心我", "没人爱我", "乡愁", "错失", "遗憾", "可怜的我", "后悔", "被拒绝", "懊悔", "悲哀", "悲伤", "让人落泪的", "被精神上折磨", "被虐待", "不开心", "不被爱", "没人要", "脆弱", "为什么是我受伤的"]
   },
   {
     name: "恐惧",
-    icon: "😟",
-    tone: "担忧害怕、紧张不安",
+    icon: "惧",
+    tone: "担忧害怕、不安",
     children: ["焦虑", "不安", "小心谨慎", "又冷又热又湿", "胆小怯懦", "自我防卫的", "不信任", "怀疑", "惧怕", "尴尬的", "逃避的", "预感", "狂乱的", "犹豫不决", "惊骇的", "歇斯底里", "拘束的", "不理解的", "恶心", "紧张", "恐慌", "麻痹的", "偏执狂", "被吓到的", "偷偷摸摸", "不可言", "羞涩", "怀疑的", "怯场", "迷信的", "多疑的", "简短生硬", "被吓坏的", "被威胁的", "羞怯", "陷入困境", "迟疑不决", "心神不宁", "容易受伤的", "想要逃避", "小心翼翼", "担心"]
   },
   {
     name: "贪求",
-    icon: "◆",
-    tone: "渴望占有、不够满足",
+    icon: "求",
+    tone: "渴望占有、不满足",
     children: ["放弃", "预期", "冷酷无情", "等不了", "冲动", "渴求", "苛求的", "狡诈的", "被驱使的", "嫉妒", "剥削", "过分迷恋", "暴怒", "失意的", "贪吃暴食的", "贪婪的", "囤积", "饥饿", "我想", "不耐烦", "好色的", "淫荡的", "操纵别人", "吝啬的", "一定要得到", "从来不满足", "从来不满意", "着迷的", "满发娇纵", "占有欲强的", "掠夺成性的", "困扰已见", "鲁莽", "残忍的", "诡计多端", "自私的", "如饥似渴", "放肆"]
   },
   {
     name: "愤怒",
-    icon: "🔥",
-    tone: "生气烦躁、抵抗敌意",
+    icon: "怒",
+    tone: "生气烦躁、抵抗",
     children: ["伤人感情的", "好斗的", "被惹恼的", "好辩的", "好战的", "怒火", "令人恐惧的", "刻薄的", "挑衅的", "苛求的", "毁灭性的", "嫌恶", "脾气暴躁", "凶猛的", "泄气的", "气愤", "狂怒的", "严厉", "憎恨", "敌意", "不耐烦", "愤愤不平", "生气", "妒忌", "怒气冲冲", "疯狂", "卑鄙", "残忍", "凶残的", "义愤填膺", "坏脾气", "顽固", "抵制", "粗鲁", "野蛮", "冲突激化", "怨恨", "暴力", "易爆发", "恶劣的", "任性的"]
   },
   {
     name: "自尊自傲",
-    icon: "♛",
-    tone: "自我重要、优越比较",
+    icon: "傲",
+    tone: "自我重要、比较",
     children: ["无耻可寻", "超然离群", "自负", "固执己见", "无聊", "聪明", "封闭的", "沾沾自喜", "逞能", "轻蔑的", "酷", "挑剔的", "鄙夷", "傲慢专断", "假谦卑", "虚假美德", "扬扬得意", "傲慢", "自以为是", "虚伪", "冷冰冰地", "孤僻的", "批判性的", "自称无所不知的", "心胸狭隘", "永远不会错", "武断", "盛气凌人", "神气十足", "偏颇的", "放肆", "自以为公正的", "刚直不屈", "自恋的", "自鸣得意", "自私", "自命不凡", "势利眼", "独特", "被宠坏的", "顽固不化", "自高自大", "优越感", "强硬不妥协", "无感觉的", "不宽恕的", "不屈服的", "爱慕虚荣"]
   },
   {
     name: "无畏",
-    icon: "⚑",
-    tone: "勇敢自信、积极主动",
+    icon: "勇",
+    tone: "勇敢自信、主动",
     children: ["喜欢冒险的", "警惕的", "活着的", "胸有成竹", "机智的", "有中心的", "有把握的", "愉快", "思路清晰", "伶俐", "能干的", "自信的", "创新的", "大胆", "果断的", "有活力", "热切的", "热情的", "欢欣", "探索", "灵活性", "专注的", "乐善好施", "开心", "可敬的", "幽默", "我行", "独立", "首创精神", "正直", "所向披靡", "有爱的", "头脑清楚", "自强不息", "开放", "乐观", "洞察力", "积极", "意志坚强", "敏感的", "稳当的", "自给自足", "犀利的", "坚强的", "助人为乐", "不知疲惫", "精力充沛", "乐意", "热忱"]
   },
   {
     name: "接纳",
-    icon: "💜",
-    tone: "敞开包容、理解慈悲",
+    icon: "纳",
+    tone: "敞开包容、理解",
     children: ["丰盛", "有眼力的", "平衡", "美丽", "归属感", "天真烂漫", "同情心", "体贴的", "高兴", "兴高采烈", "拥抱", "善解人意", "丰富", "一切都很好", "友善的", "丰满", "温柔", "热情洋溢", "亲切的", "和睦的", "和谐", "直觉的", "合拍", "令人高兴的", "富有爱心的", "宽宏大量", "成熟的", "轻松自如", "无需更改", "开放", "幽默的", "容光焕发", "善于接受", "稳当的", "温和的", "柔和的", "理解", "温暖", "幸福", "奇迹"]
   },
   {
     name: "平和",
-    icon: "✿",
-    tone: "平静安宁、满足喜悦",
+    icon: "和",
+    tone: "平静安宁、满足",
     children: ["永不衰老", "有觉悟的", "存在", "无边无际", "镇定", "不朽", "自由", "满足的", "热情洋溢", "轻松", "同一性", "完美", "纯粹", "安静", "宁静", "无限空间", "静止", "永恒的", "安宁", "无限", "完整"]
   }
 ];
@@ -131,22 +131,13 @@ const TOPICS = [
     guidance: "列出你觉得不得不做的事，释放每一项背后的感受。"
   },
   {
-    id: "goal-feelings",
+    id: "goal",
     page: "39-46",
-    title: "目标表格",
+    title: "目标",
     type: "emotion",
-    workbookType: "目标情绪",
+    workbookType: "目标情绪与行动",
     fields: ["目标", "我对目标现在有什么感受？"],
-    guidance: "读一遍目标，释放你现在对目标的感受，直到无畏、接纳或平静。"
-  },
-  {
-    id: "goal-actions",
-    page: "41-45",
-    title: "目标行动清单",
-    type: "emotion",
-    workbookType: "行动情绪",
-    fields: ["为了达成目标我要做的事", "我现在对每一件事有什么感受？"],
-    guidance: "行动项必须关联目标。逐一释放对行动的感受，直到能轻松行动。"
+    guidance: "把目标感受和为了达成目标要做的事放在同一条记录里，先释放目标感受，再释放行动阻力。"
   },
   {
     id: "remember-approval-control",
@@ -284,10 +275,192 @@ function splitEntries(value = "") {
     .filter(Boolean);
 }
 
-function recordItems(record) {
-  if (Array.isArray(record.items) && record.items.length) return record.items.filter((item) => item.text || item.id);
-  if (record.feeling) return [{ id: `${record.id}-legacy`, text: record.feeling, released: Boolean(record.released) }];
-  return [];
+const STRUCTURED_SCHEMA_VERSION = 2;
+
+const COMPLEX_TOPIC_IDS = new Set(["success", "likes-dislikes", "stuckness", "goal"]);
+
+const TOPIC_STRUCTURES = {
+  success: {
+    type: "success",
+    sections: [
+      { key: "success", title: "如果成功" },
+      { key: "failure", title: "如果失败" }
+    ]
+  },
+  "likes-dislikes": {
+    type: "likes-dislikes",
+    groupLabel: "方面",
+    sections: [
+      { key: "likes", title: "我喜欢的方面", groupPrompt: "方面内容" },
+      { key: "dislikes", title: "我不喜欢的方面", groupPrompt: "方面内容" }
+    ]
+  },
+  stuckness: {
+    type: "stuckness",
+    groupLabel: "条目",
+    sections: [
+      { key: "benefits", title: "对我有什么好处", groupPrompt: "好处内容" },
+      { key: "harms", title: "对我有什么坏处", groupPrompt: "坏处内容" }
+    ]
+  },
+  goal: {
+    type: "goal",
+    groupLabel: "行动",
+    sections: [
+      { key: "goal-feelings", title: "我对此有什么感受" },
+      { key: "goal-actions", title: "为了达成目标要做的事", groupPrompt: "行动内容" }
+    ]
+  }
+};
+
+function topicStructure(topic) {
+  if (TOPIC_STRUCTURES[topic.id]) return TOPIC_STRUCTURES[topic.id];
+  if (topic.columns?.length) {
+    return {
+      type: "columns",
+      sections: topic.columns.map((column, index) => ({ key: `column-${index}`, title: column }))
+    };
+  }
+  return {
+    type: "simple",
+    sections: [{ key: "default", title: feelingLabel(topic) }]
+  };
+}
+
+function isV2Record(record) {
+  return record?.schemaVersion === STRUCTURED_SCHEMA_VERSION && Array.isArray(record.sections);
+}
+
+function sectionCanHaveGroups(structure, sectionKey) {
+  return (
+    structure.type === "likes-dislikes" ||
+    structure.type === "stuckness" ||
+    (structure.type === "goal" && sectionKey === "goal-actions")
+  );
+}
+
+function cardKind(topic) {
+  return topic.type === "want" ? "want" : "feeling";
+}
+
+function makeCard(topic, text = "", released = false) {
+  const stamp = nowIso();
+  return {
+    id: uid("card"),
+    kind: cardKind(topic),
+    text,
+    released,
+    createdAt: stamp,
+    updatedAt: stamp
+  };
+}
+
+function makeGroup(text = "", cards = []) {
+  const stamp = nowIso();
+  return {
+    id: uid("group"),
+    text,
+    feelsGood: false,
+    cards,
+    createdAt: stamp,
+    updatedAt: stamp
+  };
+}
+
+function makeSection(definition, withGroups = false) {
+  const stamp = nowIso();
+  return {
+    id: uid("section"),
+    key: definition.key,
+    title: definition.title,
+    text: "",
+    feelsGood: false,
+    groups: withGroups ? [] : [],
+    cards: withGroups ? [] : [],
+    createdAt: stamp,
+    updatedAt: stamp
+  };
+}
+
+function makeStructuredRecord(topic, subject = "") {
+  const structure = topicStructure(topic);
+  const stamp = nowIso();
+  return {
+    id: uid("topic"),
+    topicId: topic.id,
+    schemaVersion: STRUCTURED_SCHEMA_VERSION,
+    structureType: structure.type,
+    subject,
+    sections: structure.sections.map((section) => makeSection(section, sectionCanHaveGroups(structure, section.key))),
+    gain: "",
+    createdAt: stamp,
+    updatedAt: stamp
+  };
+}
+
+function activeTopicRecords(topicId) {
+  return state.data.topicRecords.filter((record) => record.topicId === topicId && isV2Record(record));
+}
+
+function findSection(record, sectionIdOrKey) {
+  return record?.sections?.find((section) => section.id === sectionIdOrKey || section.key === sectionIdOrKey);
+}
+
+function findGroup(section, groupId) {
+  return section?.groups?.find((group) => group.id === groupId);
+}
+
+function findCard(container, cardId) {
+  return container?.cards?.find((card) => card.id === cardId);
+}
+
+function findPathTarget(record, path = {}) {
+  const section = findSection(record, path.sectionId || path.sectionKey);
+  const group = path.groupId ? findGroup(section, path.groupId) : null;
+  const container = group || section;
+  const card = findCard(container, path.cardId);
+  return { section, group, container, card };
+}
+
+function allRecordCards(record) {
+  if (!isV2Record(record)) return [];
+  return record.sections.flatMap((section) => [
+    ...(section.cards || []),
+    ...(section.groups || []).flatMap((group) => group.cards || [])
+  ]);
+}
+
+function recordIsGood(record) {
+  if (!isV2Record(record)) return false;
+  const sectionsWithCards = record.sections.filter((section) =>
+    (section.cards || []).length || (section.groups || []).some((group) => (group.cards || []).length)
+  );
+  if (!sectionsWithCards.length) return false;
+  return sectionsWithCards.every((section) => {
+    if ((section.groups || []).length) {
+      const groupsWithCards = section.groups.filter((group) => (group.cards || []).length);
+      return groupsWithCards.length > 0 && groupsWithCards.every((group) => group.feelsGood);
+    }
+    return section.feelsGood;
+  });
+}
+
+function summarizeStructuredRecord(record) {
+  if (!isV2Record(record)) return ["旧记录"];
+  const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
+  const structure = topicStructure(topic);
+  return record.sections.map((section) => {
+    if (sectionCanHaveGroups(structure, section.key)) {
+      const cardCount = (section.groups || []).reduce((total, group) => total + (group.cards || []).length, 0);
+      return `${section.title}：${(section.groups || []).length} 条 · ${cardCount} 个${fieldName(topic)}`;
+    }
+    const suffix = section.feelsGood ? "感觉好了" : "还不好";
+    return `${section.title}：${(section.cards || []).length} 个${fieldName(topic)} · ${suffix}`;
+  });
+}
+
+function sectionByFormName(record, name) {
+  return findSection(record, name.replace(/^section-/, ""));
 }
 
 function feelingLabel(topic) {
@@ -304,23 +477,14 @@ function fieldName(topic) {
   return topic.type === "want" ? "想要" : "感受";
 }
 
-function releaseRowsFromForm(form) {
-  return [...form.querySelectorAll(".release-table-row")]
-    .map((row) => {
-      const id = row.querySelector('input[name="itemId"]')?.value || uid("item");
-      const text = row.querySelector('input[name="itemText"]')?.value.trim() || "";
-      const released = Boolean(row.querySelector('input[name="itemReleased"]')?.checked);
-      return { id, text, released };
-    })
-    .filter((item) => item.text);
-}
-
-function makeReleaseTableRow(label = "") {
+function makeCardRow(topic, namePrefix, card = null) {
+  const id = card?.id || "";
   return `
-    <div class="release-table-row">
-      <input name="itemText" placeholder="${label}" />
-      <label class="mini-check"><input type="checkbox" name="itemReleased" /><span>✓</span></label>
-      <button class="row-delete-btn" type="button" data-action="remove-topic-form-row" aria-label="删除这一行">×</button>
+    <div class="release-table-row" data-card-row>
+      <input type="hidden" name="${namePrefix}CardId" value="${escapeHtml(id)}" />
+      <input name="${namePrefix}CardText" value="${escapeHtml(card?.text || "")}" placeholder="${fieldName(topic)}" />
+      <label class="mini-check"><input type="checkbox" name="${namePrefix}CardReleased" value="${escapeHtml(id || "new")}" ${card?.released ? "checked" : ""} /><span>✓</span></label>
+      <button class="row-delete-btn" type="button" data-action="remove-structured-card-row" aria-label="删除这一行">×</button>
     </div>
   `;
 }
@@ -333,26 +497,58 @@ function modeLabel(type) {
   return type === "want" ? "释放想要" : "释放情绪";
 }
 
+function emotionIcon(group, index) {
+  const color = "currentColor";
+  const icons = [
+    `<path d="m3 3 18 18"/><path d="M6.2 6.2A7 7 0 0 1 18.7 9.4 5 5 0 0 1 19 19H8a5 5 0 0 1-2.6-9.3"/>`,
+    `<path d="M20 16.2A4.5 4.5 0 0 0 17 8h-1.3A7 7 0 1 0 4 14.9"/><path d="M8 19v1"/><path d="M12 19v1"/><path d="M16 19v1"/>`,
+    `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M12 8v4"/><path d="M12 16h.01"/>`,
+    `<path d="M11 11V7a2 2 0 0 1 4 0v5"/><path d="M15 11V8a2 2 0 0 1 4 0v7a6 6 0 0 1-6 6h-2a7 7 0 0 1-5.6-2.8L3 15a2 2 0 1 1 3.3-2.2L8 15"/><path d="M8 15V9a2 2 0 0 1 4 0v5"/>`,
+    `<path d="M8.5 14.5A3.5 3.5 0 0 0 12 22a6 6 0 0 0 6-6c0-5-4-7-4-11-2 1-4 4-4 7a4 4 0 0 0-1.5 2.5Z"/>`,
+    `<path d="m2 6 4 12h12l4-12-6 4-4-7-4 7-6-4Z"/><path d="M6 18h12"/>`,
+    `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/>`,
+    `<path d="m11 17 2 2a3 3 0 0 0 4 0l3-3"/><path d="m14 14 2 2"/><path d="m3 12 4-4 4 4"/><path d="M7 8h5l2 2"/>`,
+    `<path d="M11 20A7 7 0 0 1 4 13C4 6 12 3 20 4c1 8-2 16-9 16Z"/><path d="M4 20c4-4 8-6 14-8"/>`
+  ];
+  return `
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      ${icons[index] || `<text x="12" y="16" text-anchor="middle">${group.icon}</text>`}
+    </svg>
+  `;
+}
+
 function emotionPicker() {
   return `
     <div class="emotion-picker" aria-label="九大情绪选择">
-      <div class="emotion-divider"><span></span><b>或直接选择一种情绪</b><span></span></div>
+      <div class="emotion-reference-head">
+        <b>情绪参考</b>
+        <span>想不到具体感受时使用</span>
+      </div>
       <div class="emotion-card-row">
         ${EMOTION_GROUPS.map((group, index) => `
-          <article class="emotion-card emotion-card-${index}" data-emotion-card data-emotion="${group.name}">
-            <button class="emotion-card-main" type="button" data-action="select-emotion" data-emotion="${group.name}">
-              <span class="emotion-icon">${group.icon}</span>
+          <article class="emotion-card emotion-card-${index}" data-emotion="${group.name}">
+            <button class="emotion-card-main" type="button" data-action="select-emotion" data-emotion="${group.name}" aria-label="${group.name}">
+              <span class="emotion-orb"><span class="emotion-icon">${emotionIcon(group, index)}</span></span>
               <strong>${group.name}</strong>
-              <small>${group.tone}</small>
-              <i></i>
             </button>
-            <div class="emotion-sublist" aria-label="${group.name}子情绪">
-              ${group.children.map((child) => `<button type="button" data-action="select-emotion" data-emotion="${group.name}">${child}</button>`).join("")}
+            <div class="emotion-action-popover" aria-label="${group.name}子情绪入口">
+              <button class="emotion-more-btn" type="button" data-action="open-subemotions" data-emotion="${group.name}">子情绪</button>
+            </div>
+            <div class="emotion-subemotion-sheet" data-action="close-subemotions" aria-label="${group.name}子情绪">
+              <div class="emotion-subemotion-panel">
+                <header>
+                  <span class="emotion-sheet-icon">${emotionIcon(group, index)}</span>
+                  <strong>${group.name}</strong>
+                  <button type="button" data-action="close-subemotions">收回</button>
+                </header>
+                <div class="emotion-chip-cloud">
+                  ${group.children.map((child) => `<button type="button" data-action="select-subemotion" data-emotion="${group.name}">${child}</button>`).join("")}
+                </div>
+              </div>
             </div>
           </article>
         `).join("")}
       </div>
-      <div class="energy-scale"><span>能量低落 / 扭曲</span><i></i><span>能量提升 / 连接</span></div>
     </div>
   `;
 }
@@ -460,7 +656,6 @@ function promptChoices(prompt) {
 
 function recordMarkdown(record) {
   const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
-  const items = recordItems(record);
   const sessions = state.data.sessions.filter((session) => session.recordId === record.id);
   const rounds = sessions.flatMap((session) =>
     state.data.rounds
@@ -468,20 +663,33 @@ function recordMarkdown(record) {
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       .map((round) => ({ ...round, session }))
   );
+  const sectionLines = isV2Record(record)
+    ? record.sections.flatMap((section) => {
+        const lines = [`## ${markdownEscape(section.title)}`, "", `- 感觉好了吗：${section.feelsGood ? "是" : "否"}`];
+        if ((section.cards || []).length) {
+          lines.push("", ...(section.cards.map((card) => `- [${card.released ? "x" : " "}] ${markdownEscape(card.text)}`)));
+        }
+        if ((section.groups || []).length) {
+          for (const group of section.groups) {
+            lines.push("", `### ${markdownEscape(group.text || "未填写")}`, "", `- 感觉好了吗：${group.feelsGood ? "是" : "否"}`);
+            lines.push(...((group.cards || []).map((card) => `- [${card.released ? "x" : " "}] ${markdownEscape(card.text)}`)));
+          }
+        }
+        if (!(section.cards || []).length && !(section.groups || []).length) lines.push("", "- 未填写");
+        return lines;
+      })
+    : ["## 旧记录", "", "此记录使用旧数据结构，当前版本不再导出旧明细。"];
   const lines = [
     `# ${markdownEscape(record.subject || "未命名释放")}`,
     "",
     `- 主题：${topic.title}`,
     `- 页码：${topic.page}`,
-    `- 类型：${modeLabel(record.releaseType || topic.type)}`,
-    record.column ? `- 所属列：${markdownEscape(record.column)}` : "",
+    `- 类型：${modeLabel(topic.type)}`,
     `- 创建时间：${record.createdAt || ""}`,
     `- 更新时间：${record.updatedAt || ""}`,
-    `- 感觉好了吗：${record.feelsGood ? "是" : "否"}`,
+    `- 感觉好了吗：${recordIsGood(record) ? "是" : "否"}`,
     "",
-    "## 情绪 / 想要",
-    "",
-    ...(items.length ? items.map((item) => `- [${item.released ? "x" : " "}] ${markdownEscape(item.text)}`) : ["- 未填写"]),
+    ...sectionLines,
     "",
     "## 引导记录",
     "",
@@ -614,7 +822,9 @@ function downloadBlob(blob, filename) {
 }
 
 function exportTopicRecords() {
-  const records = [...state.data.topicRecords].sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+  const records = state.data.topicRecords
+    .filter(isV2Record)
+    .sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   if (!records.length) return showToast("还没有可导出的释放记录");
   const files = records.map((record) => {
     const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
@@ -628,7 +838,7 @@ function exportTopicRecords() {
 
 function exportGains() {
   const topicGains = state.data.topicRecords
-    .filter((record) => record.gain)
+    .filter((record) => isV2Record(record) && record.gain)
     .map((record) => ({
       id: `topic-gain-${record.id}`,
       body: record.gain,
@@ -737,7 +947,7 @@ function topicsView() {
       </div>
       <div class="topic-list">
         ${topics.map((topic) => {
-          const count = state.data.topicRecords.filter((record) => record.topicId === topic.id).length;
+          const count = activeTopicRecords(topic.id).length;
           return `
             <button class="list-card" data-topic="${topic.id}">
               <header>
@@ -760,7 +970,7 @@ function topicsView() {
 
 function topicDetailView() {
   const topic = getTopic(state.topicId) || TOPICS[0];
-  const records = state.data.topicRecords.filter((record) => record.topicId === topic.id);
+  const records = activeTopicRecords(topic.id);
   const selected = records.find((record) => record.id === state.selectedTopicRecordId) || records[0];
   const isFreeTopic = topic.id === FREE_RELEASE_TOPIC.id;
   return appFrame(`
@@ -789,8 +999,148 @@ function topicDetailView() {
   `);
 }
 
+function structuredFields(topic, record) {
+  const structure = topicStructure(topic);
+  return `
+    <div class="structured-editor">
+      ${record.sections.map((section) => structuredSectionFields(topic, structure, section)).join("")}
+    </div>
+  `;
+}
+
+function structuredSectionFields(topic, structure, section) {
+  const grouped = sectionCanHaveGroups(structure, section.key);
+  return `
+    <section class="structured-section" data-section-id="${escapeHtml(section.id)}" data-section-key="${escapeHtml(section.key)}">
+      <header class="structured-section-head">
+        <h3>${escapeHtml(section.title)}</h3>
+        ${grouped ? "" : goodToggle(`section-${section.id}FeelsGood`, section.feelsGood)}
+      </header>
+      ${grouped ? groupedSectionFields(topic, structure, section) : directCardsFields(topic, `section-${section.id}`, section.cards || [])}
+    </section>
+  `;
+}
+
+function groupedSectionFields(topic, structure, section) {
+  const definition = structure.sections.find((item) => item.key === section.key);
+  return `
+    <div class="structured-groups" data-groups>
+      ${(section.groups || []).map((group) => structuredGroupFields(topic, section, group, definition)).join("")}
+      ${!(section.groups || []).length ? structuredGroupFields(topic, section, makeGroup("", [makeCard(topic)]), definition) : ""}
+    </div>
+    <button class="soft-btn" type="button" data-action="add-structured-group">${definition?.groupPrompt || structure.groupLabel || "分区"}</button>
+  `;
+}
+
+function structuredGroupFields(topic, section, group, definition) {
+  const prefix = `group-${group.id}`;
+  return `
+    <article class="structured-group" data-group-id="${escapeHtml(group.id)}">
+      <div class="field compact-field">
+        <label>${escapeHtml(definition?.groupPrompt || "内容")}</label>
+        <textarea name="${prefix}Text" placeholder="写下这一项">${escapeHtml(group.text || "")}</textarea>
+      </div>
+      ${directCardsFields(topic, prefix, group.cards || [])}
+      <div class="structured-group-actions">
+        ${goodToggle(`${prefix}FeelsGood`, group.feelsGood)}
+        <button class="row-delete-btn" type="button" data-action="remove-structured-group" aria-label="删除这一组">×</button>
+      </div>
+    </article>
+  `;
+}
+
+function directCardsFields(topic, prefix, cards) {
+  const rows = cards.length ? cards : [makeCard(topic)];
+  return `
+    <div class="release-table" data-release-table data-prefix="${escapeHtml(prefix)}">
+      <div class="release-table-head">
+        <span>${feelingLabel(topic)}</span>
+        <span>释放了吗</span>
+        <span></span>
+      </div>
+      ${rows.map((card) => makeCardRow(topic, prefix, card)).join("")}
+    </div>
+    <button class="soft-btn" type="button" data-action="add-structured-card-row">添加一种${fieldName(topic)}</button>
+  `;
+}
+
+function goodToggle(name, checked) {
+  return `
+    <label class="record-good-toggle">
+      <span class="box-mark">${checked ? "✓" : ""}</span>
+      <span>感觉好了吗？</span>
+      <input type="checkbox" name="${escapeHtml(name)}" ${checked ? "checked" : ""} />
+    </label>
+  `;
+}
+
+function cardsFromTable(topic, form, table) {
+  const prefix = table.dataset.prefix;
+  return [...table.querySelectorAll("[data-card-row]")]
+    .map((row) => {
+      const id = row.querySelector(`input[name="${prefix}CardId"]`)?.value || uid("card");
+      const text = row.querySelector(`input[name="${prefix}CardText"]`)?.value.trim() || "";
+      const released = Boolean(row.querySelector(`input[name="${prefix}CardReleased"]`)?.checked);
+      const previous = allRecordCards(state.data.topicRecords.find((record) => record.id === form.dataset.record) || {}).find((card) => card.id === id);
+      return {
+        id,
+        kind: cardKind(topic),
+        text,
+        released,
+        createdAt: previous?.createdAt || nowIso(),
+        updatedAt: nowIso()
+      };
+    })
+    .filter((card) => card.text);
+}
+
+function sectionsFromForm(topic, form, baseRecord) {
+  const structure = topicStructure(topic);
+  return [...form.querySelectorAll(".structured-section")].map((sectionNode) => {
+    const sectionId = sectionNode.dataset.sectionId;
+    const sectionKey = sectionNode.dataset.sectionKey;
+    const previousSection = findSection(baseRecord, sectionId) || {};
+    const definition = structure.sections.find((item) => item.key === sectionKey) || previousSection;
+    const grouped = sectionCanHaveGroups(structure, sectionKey);
+    const section = {
+      id: sectionId || uid("section"),
+      key: sectionKey,
+      title: definition.title,
+      text: previousSection.text || "",
+      feelsGood: Boolean(form.elements[`section-${sectionId}FeelsGood`]?.checked),
+      groups: [],
+      cards: [],
+      createdAt: previousSection.createdAt || nowIso(),
+      updatedAt: nowIso()
+    };
+    if (grouped) {
+      section.groups = [...sectionNode.querySelectorAll(".structured-group")]
+        .map((groupNode) => {
+          const groupId = groupNode.dataset.groupId || uid("group");
+          const previousGroup = findGroup(previousSection, groupId) || {};
+          const prefix = `group-${groupId}`;
+          const table = groupNode.querySelector("[data-release-table]");
+          const group = {
+            id: groupId,
+            text: form.elements[`${prefix}Text`]?.value.trim() || "",
+            feelsGood: Boolean(form.elements[`${prefix}FeelsGood`]?.checked),
+            cards: table ? cardsFromTable(topic, form, table) : [],
+            createdAt: previousGroup.createdAt || nowIso(),
+            updatedAt: nowIso()
+          };
+          return group;
+        })
+        .filter((group) => group.text || group.cards.length);
+    } else {
+      const table = sectionNode.querySelector("[data-release-table]");
+      section.cards = table ? cardsFromTable(topic, form, table) : [];
+    }
+    return section;
+  });
+}
+
 function topicForm(topic) {
-  const goalOptions = state.data.goals.map((goal) => `<option value="${goal.id}">${escapeHtml(goal.statement)}</option>`).join("");
+  const draft = makeStructuredRecord(topic);
   return `
     <form class="form-card" data-form="topic-record">
       <h2 class="section-title">添加释放记录</h2>
@@ -799,44 +1149,7 @@ function topicForm(topic) {
         <label>${topic.fields[0]}</label>
         <textarea name="subject" required placeholder="写下这一项"></textarea>
       </div>
-      ${topic.columns ? `
-        <div class="field">
-          <label>所属列</label>
-          <select name="column">
-            ${topic.columns.map((column) => `<option value="${column}">${column}</option>`).join("")}
-          </select>
-        </div>
-      ` : ""}
-      <div class="release-table" data-release-table>
-        <div class="release-table-head">
-          <span>${feelingLabel(topic)}</span>
-          <span>释放了吗</span>
-          <span></span>
-        </div>
-        <div class="release-table-row">
-          <input name="itemText" required placeholder="${feelingPlaceholder(topic)}" />
-          <label class="mini-check"><input type="checkbox" name="itemReleased" value="0" /><span>✓</span></label>
-          <button class="row-delete-btn" type="button" data-action="remove-topic-form-row" aria-label="删除这一行">×</button>
-        </div>
-      </div>
-      <button class="soft-btn" type="button" data-action="add-topic-form-row">添加一种${fieldName(topic)}</button>
-      ${topic.id.includes("goal") ? `
-        <div class="field">
-          <label>关联目标</label>
-          <select name="goalId">
-            <option value="">不关联</option>
-            ${goalOptions}
-          </select>
-        </div>
-      ` : ""}
-      <div class="field">
-        <label>感觉好了吗？</label>
-        <div class="choice-grid" data-choice="feelsGood">
-          <button class="choice-btn selected" type="button" data-value="false">还没有</button>
-          <button class="choice-btn" type="button" data-value="true">感觉好了</button>
-        </div>
-        <input type="hidden" name="feelsGood" value="false" />
-      </div>
+      ${structuredFields(topic, draft)}
       <div class="field">
         <label>收获</label>
         <textarea name="gain" placeholder="这次练习后的收获、变化或觉察"></textarea>
@@ -854,10 +1167,10 @@ function topicRecordsBrowser(topic, records, selected) {
       <div class="record-master" aria-label="释放目标列表">
         ${records.map((record) => `
           <button class="record-master-item ${selected?.id === record.id ? "active" : ""}" data-action="select-topic-record" data-record="${record.id}">
-            <span class="box-mark">${record.feelsGood ? "✓" : ""}</span>
+            <span class="box-mark">${recordIsGood(record) ? "✓" : ""}</span>
             <span>
-              <strong>${escapeHtml(record.subject)}</strong>
-              <small>${record.column ? `${escapeHtml(record.column)} · ` : ""}${formatDate(record.createdAt)}</small>
+              <strong>${escapeHtml(record.subject || "未命名释放")}</strong>
+              <small>${summarizeStructuredRecord(record).map(escapeHtml).join(" / ")} · ${formatDate(record.createdAt)}</small>
             </span>
           </button>
         `).join("")}
@@ -870,10 +1183,7 @@ function topicRecordsBrowser(topic, records, selected) {
 }
 
 function topicRecordDetail(topic, record) {
-  const items = recordItems(record);
-  const releaseType = record.releaseType || topic.type;
-  const itemLabel = releaseType === "want" ? "想要" : "感受";
-  const itemQuestion = releaseType === "want" ? "我对此有什么想要？" : "我对此有什么感受？";
+  if (!isV2Record(record)) return `<div class="empty">这是一条旧结构记录，当前版本不再编辑旧记录。</div>`;
   return `
     <form class="record-detail-card" data-form="update-topic-record" data-record="${record.id}">
       <header>
@@ -883,35 +1193,7 @@ function topicRecordDetail(topic, record) {
         </div>
         <span class="meta">${formatDate(record.createdAt)}</span>
       </header>
-      ${topic.columns ? `
-        <div class="field compact-field">
-          <label>所属列</label>
-          <select name="column">
-            ${topic.columns.map((column) => `<option value="${column}" ${record.column === column ? "selected" : ""}>${column}</option>`).join("")}
-          </select>
-        </div>
-      ` : `<input type="hidden" name="column" value="${escapeHtml(record.column || "")}" />`}
-      <div class="release-table" data-release-table>
-        <div class="release-table-head">
-          <span>${itemQuestion}</span>
-          <span>释放了吗</span>
-          <span></span>
-        </div>
-        ${items.length ? items.map((item) => `
-          <div class="release-table-row">
-            <input type="hidden" name="itemId" value="${escapeHtml(item.id)}" />
-            <input name="itemText" value="${escapeHtml(item.text)}" placeholder="${itemLabel}" />
-            <label class="mini-check"><input type="checkbox" name="itemReleased" value="${escapeHtml(item.id)}" ${item.released ? "checked" : ""} /><span>✓</span></label>
-            <button class="row-delete-btn" type="button" data-action="remove-topic-form-row" aria-label="删除这一行">×</button>
-          </div>
-        `).join("") : `<div class="empty">还没有${itemLabel}。</div>`}
-      </div>
-      <button class="soft-btn" type="button" data-action="add-topic-form-row">添加一种${itemLabel}</button>
-      <label class="record-good-toggle">
-        <span class="box-mark">${record.feelsGood ? "✓" : ""}</span>
-        <span>感觉好了吗？</span>
-        <input type="checkbox" name="feelsGood" ${record.feelsGood ? "checked" : ""} />
-      </label>
+      ${structuredFields(topic, record)}
       <div class="field compact-field">
         <label>收获</label>
         <textarea name="gain" placeholder="这次练习后的收获、变化或觉察">${escapeHtml(record.gain || "")}</textarea>
@@ -977,24 +1259,43 @@ function releaseStartView() {
 function releaseSetupView() {
   const setup = state.releaseSetup;
   if (!setup) return releaseStartView();
-  const topic = getTopic(setup.topicId);
+  const baseTopic = getTopic(setup.topicId);
+  const topic = setup.topicId === FREE_RELEASE_TOPIC.id && setup.releaseType ? { ...baseTopic, type: setup.releaseType } : baseTopic;
+  const structure = topicStructure(topic);
+  const needsContext = structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id);
+  const selectedSection = setup.sectionKey ? structure.sections.find((section) => section.key === setup.sectionKey) : structure.sections[0];
+  const hasGroupedSection = structure.sections.some((section) => sectionCanHaveGroups(structure, section.key));
   const isSubjectStep = setup.step === "subject";
+  const isContextStep = setup.step === "context";
+  const isFeelingStep = setup.step === "feeling";
+  const prompt = isSubjectStep
+    ? topic.fields[0]
+    : isContextStep
+      ? "这次释放属于哪一部分？"
+      : feelingLabel(topic);
   return appFrame(`
     <main class="release-stage">
       <div>
         <span class="eyebrow">${topic.title} · ${modeLabel(topic.type)}</span>
         <h1 class="screen-title">主题释放</h1>
       </div>
-      <form class="prompt-card" data-form="${isSubjectStep ? "release-setup-subject" : "release-setup-feeling"}">
+      <form class="prompt-card" data-form="${isSubjectStep ? "release-setup-subject" : isContextStep ? "release-setup-context" : "release-setup-feeling"}">
         <input type="hidden" name="topicId" value="${topic.id}" />
-        <span class="meta">${isSubjectStep ? "第一步" : "第二步"}</span>
-        <p class="prompt-text">${isSubjectStep ? topic.fields[0] : feelingLabel(topic)}</p>
-        ${isSubjectStep
-          ? `<textarea name="subject" required placeholder="写下这次具体释放的内容">${escapeHtml(setup.subject || "")}</textarea>`
-          : `<input name="feeling" required placeholder="${topic.type === "want" ? "现在最明显的想要是什么？" : "现在最明显的感受是什么？"}" />
-            ${topic.type === "emotion" ? emotionPicker() : ""}`}
-        <button class="primary-btn" type="submit">${isSubjectStep ? "下一步" : "进入引导"}</button>
+        <span class="meta">${isSubjectStep ? "第一步" : isContextStep ? "第二步" : needsContext ? "第三步" : "第二步"}</span>
+        <p class="prompt-text">${prompt}</p>
+        ${isSubjectStep ? `<textarea name="subject" required placeholder="写下这次具体释放的内容">${escapeHtml(setup.subject || "")}</textarea>` : ""}
+        ${isContextStep ? `
+          <select name="sectionKey">
+            ${structure.sections.map((section) => `<option value="${section.key}" ${setup.sectionKey === section.key ? "selected" : ""}>${section.title}</option>`).join("")}
+          </select>
+          ${hasGroupedSection ? `
+            <textarea name="groupText" placeholder="${escapeHtml(selectedSection?.groupPrompt || "方面/行动内容，选择对应分区时填写")}">${escapeHtml(setup.groupText || "")}</textarea>
+          ` : ""}
+        ` : ""}
+        ${isFeelingStep ? `<input name="feeling" required placeholder="${topic.type === "want" ? "现在最明显的想要是什么？" : "现在最明显的感受是什么？"}" />` : ""}
+        <button class="primary-btn" type="submit">${isFeelingStep ? "进入引导" : "下一步"}</button>
       </form>
+      ${isFeelingStep && topic.type === "emotion" ? `<section class="emotion-picker-panel">${emotionPicker()}</section>` : ""}
       <div class="action-row">
         <button class="soft-btn" data-action="cancel-release-setup">取消</button>
       </div>
@@ -1083,6 +1384,21 @@ function releaseView() {
         <input name="feeling" required value="${escapeHtml(release.currentFeeling)}" />
         <button class="primary-btn" type="submit">继续释放</button>
       </form>
+      ${release.releaseType === "emotion" ? `<section class="emotion-picker-panel">${emotionPicker()}</section>` : ""}
+    `;
+  }
+
+  if (release.step === "continueRelease") {
+    content = `
+      <section class="prompt-card">
+        <span class="meta">继续检查</span>
+        <p class="prompt-text">还想继续释放吗？</p>
+        <span class="hint">继续会写入同一条释放记录，不会另起一条割裂记录。</span>
+        <div class="choice-grid">
+          <button class="choice-btn" data-action="continue-release" data-answer="true">想继续</button>
+          <button class="choice-btn emphasis-choice" data-action="continue-release" data-answer="false">不想继续</button>
+        </div>
+      </section>
     `;
   }
 
@@ -1103,7 +1419,7 @@ function releaseView() {
 
 function gainsView() {
   const topicGains = state.data.topicRecords
-    .filter((record) => record.gain)
+    .filter((record) => isV2Record(record) && record.gain)
     .map((record) => ({
       id: `topic-gain-${record.id}`,
       body: record.gain,
@@ -1269,7 +1585,7 @@ function render() {
   app.innerHTML = (views[state.route] || homeView)();
 }
 
-async function createSession({ source, topicId = null, subject, releaseType, feeling, recordId = null, goalId = null, actionId = null }) {
+async function createSession({ source, topicId = null, subject, releaseType, feeling, recordId = null, goalId = null, actionId = null, structurePath = null }) {
   const session = {
     id: uid("session"),
     source,
@@ -1282,6 +1598,7 @@ async function createSession({ source, topicId = null, subject, releaseType, fee
     recordId,
     goalId,
     actionId,
+    structurePath,
     startedAt: nowIso(),
     updatedAt: nowIso(),
     endedAt: null
@@ -1295,6 +1612,7 @@ async function createSession({ source, topicId = null, subject, releaseType, fee
     subject,
     releaseType,
     currentFeeling: feeling,
+    structurePath,
     promptIndex: 0,
     step: "prompt",
     promptAnswers: [],
@@ -1316,6 +1634,7 @@ async function resumeSession(sessionId) {
     subject: session.subject,
     releaseType: session.releaseType,
     currentFeeling: session.currentFeeling,
+    structurePath: session.structurePath || null,
     promptIndex: 0,
     step: "prompt",
     promptAnswers: [],
@@ -1353,9 +1672,7 @@ async function saveRound(released, feelsGood = false) {
 }
 
 async function completeRelease() {
-  await saveRound(true, true);
   await updateSessionStatus("completed", true);
-  await syncLinkedRecord(true, true);
   state.dialog = { type: "gain-after-release", sessionId: state.release.sessionId };
   state.release = null;
   state.route = "home";
@@ -1367,14 +1684,100 @@ async function syncLinkedRecord(released, feelsGood) {
   const session = state.data.sessions.find((item) => item.id === state.release.sessionId);
   if (session?.recordId) {
     const record = state.data.topicRecords.find((item) => item.id === session.recordId);
-    if (record) {
-      record.items = recordItems(record).map((item) => item.text === session.currentFeeling ? { ...item, released } : item);
-      record.released = released;
-      record.feelsGood = feelsGood;
+    if (isV2Record(record)) {
+      const target = findPathTarget(record, state.release.structurePath || session.structurePath);
+      if (target.card) {
+        target.card.text = state.release.currentFeeling;
+        target.card.released = released;
+        target.card.updatedAt = nowIso();
+      }
+      if (target.group) target.group.feelsGood = feelsGood;
+      else if (target.section) target.section.feelsGood = feelsGood;
       record.updatedAt = nowIso();
       await putStore("topicRecords", record);
     }
   }
+}
+
+async function appendFeelingToCurrentPath(text) {
+  const session = state.data.sessions.find((item) => item.id === state.release.sessionId);
+  const record = state.data.topicRecords.find((item) => item.id === session?.recordId);
+  const topic = getTopic(session?.topicId);
+  if (!isV2Record(record) || !topic) return;
+  const target = findPathTarget(record, state.release.structurePath || session.structurePath);
+  const card = makeCard(topic, text);
+  target.container?.cards.push(card);
+  if (target.group) target.group.updatedAt = nowIso();
+  if (target.section) target.section.updatedAt = nowIso();
+  record.updatedAt = nowIso();
+  const structurePath = {
+    sectionId: target.section?.id || "",
+    groupId: target.group?.id || "",
+    cardId: card.id
+  };
+  session.structurePath = structurePath;
+  session.currentFeeling = text;
+  session.updatedAt = nowIso();
+  await putStore("topicRecords", record);
+  await putStore("sessions", session);
+  await loadData();
+  state.release.structurePath = structurePath;
+}
+
+function ensureGoalRecord(subject, goalId = "") {
+  const topic = getTopic("goal");
+  const existing = state.data.topicRecords.find((record) =>
+    isV2Record(record) && record.topicId === "goal" && ((goalId && record.goalId === goalId) || record.subject === subject)
+  );
+  if (existing) return existing;
+  const record = makeStructuredRecord(topic, subject);
+  record.goalId = goalId;
+  return record;
+}
+
+async function createStructuredReleaseSession({ topic, subject, sectionKey, groupText = "", feeling, source = "topic-record", goalId = "", actionId = "", record = null }) {
+  const workingRecord = record || makeStructuredRecord(topic, subject);
+  workingRecord.subject = subject;
+  if (goalId) workingRecord.goalId = goalId;
+  const structure = topicStructure(topic);
+  const section = findSection(workingRecord, sectionKey) || workingRecord.sections[0];
+  let container = section;
+  let group = null;
+  if (sectionCanHaveGroups(structure, section.key)) {
+    group = actionId ? (section.groups || []).find((item) => item.actionId === actionId) : null;
+    if (!group) {
+      group = makeGroup(groupText);
+      if (actionId) group.actionId = actionId;
+      section.groups.push(group);
+    } else if (groupText) {
+      group.text = groupText;
+      group.updatedAt = nowIso();
+    }
+    container = group;
+  }
+  const card = makeCard(topic, feeling);
+  container.cards.push(card);
+  section.updatedAt = nowIso();
+  workingRecord.updatedAt = nowIso();
+  await putStore("topicRecords", workingRecord);
+  await loadData();
+  state.selectedTopicRecordId = workingRecord.id;
+  const structurePath = {
+    sectionId: section.id,
+    groupId: group?.id || "",
+    cardId: card.id
+  };
+  await createSession({
+    source,
+    topicId: topic.id,
+    subject,
+    releaseType: topic.type,
+    feeling,
+    recordId: workingRecord.id,
+    goalId,
+    actionId,
+    structurePath
+  });
 }
 
 async function pauseRelease() {
@@ -1419,14 +1822,38 @@ app.addEventListener("click", async (event) => {
       return;
     }
     ignoreNextEmotionClick = false;
-    const input = action.closest("form")?.querySelector('input[name="feeling"]');
+    const input = action.closest("form")?.querySelector('input[name="feeling"]') || action.closest(".release-stage")?.querySelector('form input[name="feeling"]');
     if (input) {
       input.value = action.dataset.emotion;
-      input.focus();
+      input.blur();
       action.closest(".emotion-picker")?.querySelectorAll(".emotion-card").forEach((card) => {
         card.classList.toggle("selected", card.dataset.emotion === action.dataset.emotion);
+        card.classList.remove("subemotion-open");
       });
     }
+  }
+  if (name === "open-subemotions") {
+    const picker = action.closest(".emotion-picker");
+    picker?.querySelectorAll(".emotion-card").forEach((card) => {
+      card.classList.toggle("selected", card.dataset.emotion === action.dataset.emotion);
+      card.classList.toggle("subemotion-open", card.dataset.emotion === action.dataset.emotion);
+    });
+  }
+  if (name === "close-subemotions") {
+    if (action.classList.contains("emotion-subemotion-sheet") && event.target.closest(".emotion-subemotion-panel")) return;
+    action.closest(".emotion-card")?.classList.remove("subemotion-open");
+  }
+  if (name === "select-subemotion") {
+    const input = action.closest(".release-stage")?.querySelector('form input[name="feeling"]');
+    const card = action.closest(".emotion-card");
+    if (input) {
+      input.value = action.dataset.emotion;
+      input.blur();
+    }
+    card?.closest(".emotion-picker")?.querySelectorAll(".emotion-card").forEach((item) => {
+      item.classList.toggle("selected", item === card);
+      item.classList.remove("subemotion-open");
+    });
   }
   if (name === "export-topic-records") exportTopicRecords();
   if (name === "export-gains") exportGains();
@@ -1435,41 +1862,52 @@ app.addEventListener("click", async (event) => {
     render();
   }
   if (name === "add-topic-form-row") {
-    const form = action.closest("form");
-    const topic = getTopic(form?.querySelector('input[name="topicId"]')?.value) || getTopic(state.topicId) || TOPICS[0];
-    const table = form?.querySelector("[data-release-table]");
-    if (table) table.insertAdjacentHTML("beforeend", makeReleaseTableRow(fieldName(topic)));
+    showToast("当前版本已使用结构化记录，请使用各分区里的添加按钮");
   }
-  if (name === "remove-topic-form-row") {
-    const row = action.closest(".release-table-row");
+  if (name === "add-structured-card-row") {
+    const form = action.closest("form");
+    const topic = getTopic(form?.querySelector('input[name="topicId"]')?.value) || getTopic(state.topicId) || FREE_RELEASE_TOPIC;
+    const table = action.previousElementSibling?.matches("[data-release-table]") ? action.previousElementSibling : action.parentElement.querySelector("[data-release-table]");
+    if (table) table.insertAdjacentHTML("beforeend", makeCardRow(topic, table.dataset.prefix));
+  }
+  if (name === "remove-structured-card-row") {
+    const row = action.closest("[data-card-row]");
     const table = action.closest("[data-release-table]");
-    const rows = table ? [...table.querySelectorAll(".release-table-row")] : [];
+    const rows = table ? [...table.querySelectorAll("[data-card-row]")] : [];
     if (row && rows.length > 1) {
       row.remove();
     } else if (row) {
-      const input = row.querySelector('input[name="itemText"]');
-      const checkbox = row.querySelector('input[name="itemReleased"]');
+      const input = row.querySelector('input[name$="CardText"]');
+      const checkbox = row.querySelector('input[name$="CardReleased"]');
       if (input) input.value = "";
       if (checkbox) checkbox.checked = false;
     }
   }
+  if (name === "add-structured-group") {
+    const form = action.closest("form");
+    const topic = getTopic(form?.querySelector('input[name="topicId"]')?.value) || getTopic(state.topicId) || TOPICS[0];
+    const section = action.closest(".structured-section");
+    const groupList = section?.querySelector("[data-groups]");
+    const sectionKey = section?.dataset.sectionKey;
+    const definition = topicStructure(topic).sections.find((item) => item.key === sectionKey);
+    if (groupList) groupList.insertAdjacentHTML("beforeend", structuredGroupFields(topic, { id: section.dataset.sectionId }, makeGroup("", [makeCard(topic)]), definition));
+  }
+  if (name === "remove-structured-group") {
+    const group = action.closest(".structured-group");
+    const list = group?.parentElement;
+    const groups = list ? [...list.querySelectorAll(".structured-group")] : [];
+    if (group && groups.length > 1) group.remove();
+    else if (group) {
+      group.querySelector("textarea")?.replaceChildren();
+      const input = group.querySelector("textarea");
+      if (input) input.value = "";
+      group.querySelectorAll('input[type="text"], input[name$="CardText"]').forEach((item) => item.value = "");
+      group.querySelectorAll('input[type="checkbox"]').forEach((item) => item.checked = false);
+    }
+  }
   if (name === "create-empty-topic-record") {
     const topic = getTopic(action.dataset.topic);
-    const record = {
-      id: uid("topic"),
-      topicId: topic.id,
-      releaseType: topic.type,
-      column: topic.columns?.[0] || "",
-      subject: "",
-      feeling: "",
-      items: [{ id: uid("item"), text: "", released: false }],
-      gain: "",
-      goalId: "",
-      released: false,
-      feelsGood: false,
-      createdAt: nowIso(),
-      updatedAt: nowIso()
-    };
+    const record = makeStructuredRecord(topic);
     await putStore("topicRecords", record);
     await loadData();
     state.selectedTopicRecordId = record.id;
@@ -1497,6 +1935,7 @@ app.addEventListener("click", async (event) => {
       state.release.step = "feelsGood";
     } else {
       await saveRound(false, false);
+      await syncLinkedRecord(false, false);
       state.release.promptIndex = 0;
       state.release.step = "prompt";
     }
@@ -1505,11 +1944,37 @@ app.addEventListener("click", async (event) => {
   if (name === "answer-good") {
     const good = action.dataset.answer === "true";
     if (good) {
-      await completeRelease();
+      await saveRound(true, true);
+      await syncLinkedRecord(true, true);
+      state.release.step = "continueRelease";
+      render();
     } else {
       await saveRound(true, false);
+      await syncLinkedRecord(true, false);
       state.release.step = "nextFeeling";
       render();
+    }
+  }
+  if (name === "continue-release") {
+    const keepGoing = action.dataset.answer === "true";
+    if (keepGoing) {
+      const topic = getTopic(state.release.topicId) || FREE_RELEASE_TOPIC;
+      const structure = topicStructure(topic);
+      const needsContext = structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id);
+      const recordId = state.data.sessions.find((session) => session.id === state.release.sessionId)?.recordId || "";
+      state.releaseSetup = {
+        topicId: topic.id,
+        releaseType: state.release.releaseType,
+        step: needsContext ? "context" : "feeling",
+        subject: state.release.subject,
+        recordId,
+        sectionKey: structure.sections[0]?.key || "default"
+      };
+      await updateSessionStatus("completed", true);
+      state.release = null;
+      setRoute("releaseSetup");
+    } else {
+      await completeRelease();
     }
   }
   if (name === "pause-release") await pauseRelease();
@@ -1542,11 +2007,15 @@ app.addEventListener("click", async (event) => {
   }
   if (name === "release-goal") {
     const goal = state.data.goals.find((item) => item.id === action.dataset.goal);
-    await createSession({ source: "goal", topicId: "goal-feelings", subject: goal.statement, releaseType: "emotion", feeling: goal.feeling || "对目标的感受", goalId: goal.id });
+    const record = ensureGoalRecord(goal.statement, goal.id);
+    await createStructuredReleaseSession({ source: "goal", topic: getTopic("goal"), subject: goal.statement, sectionKey: "goal-feelings", feeling: goal.feeling || "对目标的感受", goalId: goal.id, record });
   }
   if (name === "release-action") {
     const item = state.data.actions.find((entry) => entry.id === action.dataset.actionId);
-    await createSession({ source: "action", topicId: "goal-actions", subject: item.title, releaseType: "emotion", feeling: item.feeling || "对行动的感受", goalId: item.goalId, actionId: item.id });
+    const goal = state.data.goals.find((entry) => entry.id === item.goalId);
+    const subject = goal?.statement || item.title;
+    const record = ensureGoalRecord(subject, item.goalId);
+    await createStructuredReleaseSession({ source: "action", topic: getTopic("goal"), subject, sectionKey: "goal-actions", groupText: item.title, feeling: item.feeling || "对行动的感受", goalId: item.goalId, actionId: item.id, record });
   }
   if (name === "toggle-action") {
     const item = state.data.actions.find((entry) => entry.id === action.dataset.actionId);
@@ -1570,7 +2039,10 @@ app.addEventListener("pointerdown", (event) => {
   emotionPressTimer = window.setTimeout(() => {
     emotionLongPressed = true;
     ignoreNextEmotionClick = true;
-    card.classList.add("expanded");
+    card.closest(".emotion-picker")?.querySelectorAll(".emotion-card.expanded").forEach((item) => {
+      if (item !== card) item.classList.remove("expanded");
+    });
+    card.classList.toggle("expanded");
   }, 520);
 });
 
@@ -1578,14 +2050,19 @@ app.addEventListener("pointerup", (event) => {
   const card = event.target.closest("[data-emotion-card]");
   window.clearTimeout(emotionPressTimer);
   if (!card || emotionLongPressed) return;
-  const input = card.closest("form")?.querySelector('input[name="feeling"]');
+  const input = card.closest("form")?.querySelector('input[name="feeling"]') || card.closest(".release-stage")?.querySelector('form input[name="feeling"]');
   if (input) {
     input.value = card.dataset.emotion;
+    input.focus();
     card.closest(".emotion-picker")?.querySelectorAll(".emotion-card").forEach((item) => item.classList.toggle("selected", item === card));
   }
 });
 
 app.addEventListener("pointercancel", () => {
+  window.clearTimeout(emotionPressTimer);
+});
+
+app.addEventListener("pointerleave", () => {
   window.clearTimeout(emotionPressTimer);
 });
 
@@ -1606,22 +2083,10 @@ app.addEventListener("submit", async (event) => {
 
   if (form.dataset.form === "topic-record") {
     const topic = getTopic(data.topicId);
-    const items = releaseRowsFromForm(form);
-    const record = {
-      id: uid("topic"),
-      topicId: data.topicId,
-      releaseType: topic.type,
-      column: data.column || "",
-      subject: data.subject,
-      feeling: items.map((item) => item.text).join("，"),
-      items,
-      gain: data.gain || "",
-      goalId: data.goalId || "",
-      released: false,
-      feelsGood: data.feelsGood === "true",
-      createdAt: nowIso(),
-      updatedAt: nowIso()
-    };
+    const record = makeStructuredRecord(topic, data.subject);
+    record.sections = sectionsFromForm(topic, form, record);
+    record.gain = data.gain || "";
+    record.updatedAt = nowIso();
     await putStore("topicRecords", record);
     await loadData();
     state.selectedTopicRecordId = record.id;
@@ -1632,14 +2097,10 @@ app.addEventListener("submit", async (event) => {
 
   if (form.dataset.form === "update-topic-record") {
     const record = state.data.topicRecords.find((item) => item.id === form.dataset.record);
-    if (record) {
-      const items = releaseRowsFromForm(form);
+    if (isV2Record(record)) {
+      const topic = getTopic(record.topicId);
       record.subject = data.subject;
-      record.column = data.column || "";
-      record.items = items;
-      record.feeling = items.map((item) => item.text).join("，");
-      record.released = items.length > 0 && items.every((item) => item.released);
-      record.feelsGood = Boolean(data.feelsGood);
+      record.sections = sectionsFromForm(topic, form, record);
       record.gain = data.gain || "";
       record.updatedAt = nowIso();
       await save("topicRecords", record);
@@ -1648,104 +2109,68 @@ app.addEventListener("submit", async (event) => {
   }
 
   if (form.dataset.form === "start-topic-release") {
-    const topic = getTopic(data.topicId);
-    const record = {
-      id: uid("topic"),
-      topicId: topic.id,
-      releaseType: topic.type,
-      column: "",
-      subject: data.subject,
-      feeling: data.feeling,
-      items: [{ id: uid("item"), text: data.feeling, released: false }],
-      gain: "",
-      goalId: "",
-      released: false,
-      feelsGood: false,
-      createdAt: nowIso(),
-      updatedAt: nowIso()
-    };
-    await putStore("topicRecords", record);
-    state.selectedTopicRecordId = record.id;
     state.dialog = null;
-    await loadData();
-    await createSession({
-      source: "topic-record",
-      topicId: topic.id,
-      subject: data.subject,
-      releaseType: topic.type,
-      feeling: data.feeling,
-      recordId: record.id
-    });
   }
 
   if (form.dataset.form === "release-setup-subject") {
     const topic = getTopic(data.topicId);
-    state.releaseSetup = { topicId: topic.id, step: "feeling", subject: data.subject };
+    const structure = topicStructure(topic);
+    const needsContext = structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id);
+    state.releaseSetup = {
+      topicId: topic.id,
+      step: needsContext ? "context" : "feeling",
+      subject: data.subject,
+      sectionKey: structure.sections[0]?.key || "default",
+      recordId: state.releaseSetup?.recordId || ""
+    };
+    render();
+  }
+
+  if (form.dataset.form === "release-setup-context") {
+    const topic = getTopic(data.topicId);
+    state.releaseSetup = {
+      ...state.releaseSetup,
+      topicId: topic.id,
+      step: "feeling",
+      sectionKey: data.sectionKey,
+      groupText: data.groupText || ""
+    };
     render();
   }
 
   if (form.dataset.form === "release-setup-feeling") {
-    const topic = getTopic(data.topicId);
+    const baseTopic = getTopic(data.topicId);
+    const topic = data.topicId === FREE_RELEASE_TOPIC.id && state.releaseSetup?.releaseType ? { ...baseTopic, type: state.releaseSetup.releaseType } : baseTopic;
     const subject = state.releaseSetup?.subject || topic.title;
-    const record = {
-      id: uid("topic"),
-      topicId: topic.id,
-      releaseType: topic.type,
-      column: "",
-      subject,
-      feeling: data.feeling,
-      items: [{ id: uid("item"), text: data.feeling, released: false }],
-      gain: "",
-      goalId: "",
-      released: false,
-      feelsGood: false,
-      createdAt: nowIso(),
-      updatedAt: nowIso()
-    };
-    await putStore("topicRecords", record);
-    state.selectedTopicRecordId = record.id;
+    const existing = state.releaseSetup?.recordId ? state.data.topicRecords.find((record) => record.id === state.releaseSetup.recordId) : null;
+    const structure = topicStructure(topic);
+    const sectionKey = state.releaseSetup?.sectionKey || structure.sections[0]?.key || "default";
+    const groupText = state.releaseSetup?.groupText || "";
     state.releaseSetup = null;
-    await loadData();
-    await createSession({
+    await createStructuredReleaseSession({
       source: "topic-record",
-      topicId: topic.id,
+      topic,
       subject,
-      releaseType: topic.type,
+      sectionKey,
+      groupText,
       feeling: data.feeling,
-      recordId: record.id
+      record: isV2Record(existing) ? existing : null
     });
   }
 
   if (form.dataset.form === "free-release") {
-    const record = {
-      id: uid("topic"),
-      topicId: FREE_RELEASE_TOPIC.id,
-      releaseType: data.releaseType,
-      column: "",
-      subject: data.subject,
-      feeling: data.feeling,
-      items: [{ id: uid("item"), text: data.feeling, released: false }],
-      gain: "",
-      goalId: "",
-      released: false,
-      feelsGood: false,
-      createdAt: nowIso(),
-      updatedAt: nowIso()
-    };
-    await putStore("topicRecords", record);
-    await loadData();
-    await createSession({
+    const topic = { ...FREE_RELEASE_TOPIC, type: data.releaseType };
+    await createStructuredReleaseSession({
       source: "free",
-      topicId: FREE_RELEASE_TOPIC.id,
+      topic,
       subject: data.subject,
-      releaseType: data.releaseType,
-      feeling: data.feeling,
-      recordId: record.id
+      sectionKey: "default",
+      feeling: data.feeling
     });
   }
 
   if (form.dataset.form === "next-feeling") {
-    state.release.currentFeeling = data.feeling;
+    await appendFeelingToCurrentPath(data.feeling);
     state.release.promptIndex = 0;
     state.release.step = "prompt";
     render();
@@ -1759,8 +2184,8 @@ app.addEventListener("submit", async (event) => {
 
   if (form.dataset.form === "post-release-gain") {
     const body = data.body.trim();
+    const session = state.data.sessions.find((item) => item.id === state.dialog.sessionId);
     if (body) {
-      const session = state.data.sessions.find((item) => item.id === state.dialog.sessionId);
       await putStore("gains", {
         id: uid("gain"),
         body,
@@ -1770,6 +2195,12 @@ app.addEventListener("submit", async (event) => {
         recordId: session?.recordId || "",
         goalId: session?.goalId || ""
       });
+      const record = state.data.topicRecords.find((item) => item.id === session?.recordId);
+      if (isV2Record(record)) {
+        record.gain = body;
+        record.updatedAt = nowIso();
+        await putStore("topicRecords", record);
+      }
     }
     state.dialog = null;
     await loadData();

@@ -16,7 +16,8 @@ const requiredSnippets = [
   "允许自己感受这个想要吗？",
   "const WANT_PROMPTS",
   "createSession",
-  "recordItems",
+  "STRUCTURED_SCHEMA_VERSION",
+  "sectionsFromForm",
   "我对此有什么感受？",
   "我对此有什么想要？",
   "topicRecords"

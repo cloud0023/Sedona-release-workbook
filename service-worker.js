@@ -1,4 +1,4 @@
-const CACHE_NAME = "sedona-workbook-v7";
+const CACHE_NAME = "sedona-workbook-v16";
 const ASSETS = [
   "./",
   "./index.html",
