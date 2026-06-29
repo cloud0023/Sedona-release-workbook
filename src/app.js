@@ -1349,7 +1349,6 @@ function releaseContextLines(release) {
       lines.push({ label: "归属", value: section.title });
     }
   }
-  lines.push({ label: release.releaseType === "want" ? "当前想要" : "当前感受", value: release.currentFeeling });
   return lines.filter((line) => line.value || line.label).slice(0, 3);
 }
 
@@ -1767,6 +1766,7 @@ async function appendFeelingToCurrentPath(text) {
   await putStore("sessions", session);
   await loadData();
   state.release.structurePath = structurePath;
+  state.release.currentFeeling = text;
 }
 
 function ensureGoalRecord(subject, goalId = "") {
