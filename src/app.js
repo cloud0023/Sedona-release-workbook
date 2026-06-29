@@ -390,6 +390,7 @@ function makeStructuredRecord(topic, subject = "") {
     topicId: topic.id,
     schemaVersion: STRUCTURED_SCHEMA_VERSION,
     structureType: structure.type,
+    releaseType: topic.type,
     subject,
     sections: structure.sections.map((section) => makeSection(section, sectionCanHaveGroups(structure, section.key))),
     gain: "",
@@ -447,7 +448,8 @@ function recordIsGood(record) {
 
 function summarizeStructuredRecord(record) {
   if (!isV2Record(record)) return ["旧记录"];
-  const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
+  const baseTopic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
+  const topic = record.releaseType ? { ...baseTopic, type: record.releaseType } : baseTopic;
   const structure = topicStructure(topic);
   return record.sections.map((section) => {
     if (sectionCanHaveGroups(structure, section.key)) {
@@ -1184,6 +1186,7 @@ function topicRecordsBrowser(topic, records, selected) {
 
 function topicRecordDetail(topic, record) {
   if (!isV2Record(record)) return `<div class="empty">这是一条旧结构记录，当前版本不再编辑旧记录。</div>`;
+  const effectiveTopic = record.releaseType ? { ...topic, type: record.releaseType } : topic;
   return `
     <form class="record-detail-card" data-form="update-topic-record" data-record="${record.id}">
       <header>
@@ -1193,7 +1196,7 @@ function topicRecordDetail(topic, record) {
         </div>
         <span class="meta">${formatDate(record.createdAt)}</span>
       </header>
-      ${structuredFields(topic, record)}
+      ${structuredFields(effectiveTopic, record)}
       <div class="field compact-field">
         <label>收获</label>
         <textarea name="gain" placeholder="这次练习后的收获、变化或觉察">${escapeHtml(record.gain || "")}</textarea>
@@ -1262,15 +1265,18 @@ function releaseSetupView() {
   const baseTopic = getTopic(setup.topicId);
   const topic = setup.topicId === FREE_RELEASE_TOPIC.id && setup.releaseType ? { ...baseTopic, type: setup.releaseType } : baseTopic;
   const structure = topicStructure(topic);
-  const needsContext = structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id);
+  const needsContext = topic.id !== "goal" && (structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id));
   const selectedSection = setup.sectionKey ? structure.sections.find((section) => section.key === setup.sectionKey) : structure.sections[0];
   const hasGroupedSection = structure.sections.some((section) => sectionCanHaveGroups(structure, section.key));
   const isSubjectStep = setup.step === "subject";
   const isContextStep = setup.step === "context";
+  const isGoalActionStep = setup.step === "goalAction";
   const isFeelingStep = setup.step === "feeling";
   const prompt = isSubjectStep
     ? topic.fields[0]
-    : isContextStep
+    : isGoalActionStep
+      ? "为了达成目标要做什么？"
+      : isContextStep
       ? "这次释放属于哪一部分？"
       : feelingLabel(topic);
   return appFrame(`
@@ -1279,11 +1285,12 @@ function releaseSetupView() {
         <span class="eyebrow">${topic.title} · ${modeLabel(topic.type)}</span>
         <h1 class="screen-title">主题释放</h1>
       </div>
-      <form class="prompt-card" data-form="${isSubjectStep ? "release-setup-subject" : isContextStep ? "release-setup-context" : "release-setup-feeling"}">
+      <form class="prompt-card" data-form="${isSubjectStep ? "release-setup-subject" : isGoalActionStep ? "release-setup-goal-action" : isContextStep ? "release-setup-context" : "release-setup-feeling"}">
         <input type="hidden" name="topicId" value="${topic.id}" />
-        <span class="meta">${isSubjectStep ? "第一步" : isContextStep ? "第二步" : needsContext ? "第三步" : "第二步"}</span>
+        <span class="meta">${isSubjectStep ? "第一步" : isGoalActionStep ? "行动清单" : isContextStep ? "第二步" : needsContext ? "第三步" : "第二步"}</span>
         <p class="prompt-text">${prompt}</p>
         ${isSubjectStep ? `<textarea name="subject" required placeholder="写下这次具体释放的内容">${escapeHtml(setup.subject || "")}</textarea>` : ""}
+        ${isGoalActionStep ? `<textarea name="groupText" required placeholder="写下一个为了达成目标要做的事">${escapeHtml(setup.groupText || "")}</textarea>` : ""}
         ${isContextStep ? `
           <select name="sectionKey">
             ${structure.sections.map((section) => `<option value="${section.key}" ${setup.sectionKey === section.key ? "selected" : ""}>${section.title}</option>`).join("")}
@@ -1321,6 +1328,42 @@ function sessionCard(session) {
         <button class="primary-btn" data-action="resume-session" data-session="${session.id}">继续</button>
       </div>
     </article>
+  `;
+}
+
+function releaseContextLines(release) {
+  const topic = getTopic(release.topicId) || FREE_RELEASE_TOPIC;
+  const { record, section, group } = currentReleaseTarget();
+  const subjectLabel = topic.id === "goal" ? "目标" : "主题";
+  const lines = [{ label: subjectLabel, value: record?.subject || release.subject }];
+  if (section) {
+    if (topic.id === "success") {
+      lines.push({ label: section.title, value: "" });
+    } else if (topic.id === "likes-dislikes" && group?.text) {
+      lines.push({ label: section.key === "likes" ? "喜欢" : "不喜欢", value: group.text });
+    } else if (topic.id === "stuckness" && group?.text) {
+      lines.push({ label: section.key === "benefits" ? "好处" : "坏处", value: group.text });
+    } else if (topic.id === "goal" && group?.text) {
+      lines.push({ label: "行动", value: group.text });
+    } else if (topic.id !== "goal" && topic.id !== FREE_RELEASE_TOPIC.id && section.key !== "default" && section.title !== feelingLabel(topic)) {
+      lines.push({ label: "归属", value: section.title });
+    }
+  }
+  lines.push({ label: release.releaseType === "want" ? "当前想要" : "当前感受", value: release.currentFeeling });
+  return lines.filter((line) => line.value || line.label).slice(0, 3);
+}
+
+function releaseContextPanel(release) {
+  const lines = releaseContextLines(release);
+  return `
+    <section class="release-context" aria-label="释放上下文">
+      ${lines.map((line, index) => `
+        <div class="release-context-line ${index === 0 ? "primary" : ""}">
+          <span>${escapeHtml(line.label)}</span>
+          ${line.value ? `<strong>${escapeHtml(line.value)}</strong>` : ""}
+        </div>
+      `).join("")}
+    </section>
   `;
 }
 
@@ -1406,8 +1449,9 @@ function releaseView() {
     <main class="release-stage">
       <div>
         <span class="eyebrow">${topic ? topic.title : "自由释放"}</span>
-        <h1 class="screen-title">${escapeHtml(release.subject)}</h1>
+        <h1 class="screen-title">释放引导</h1>
       </div>
+      ${releaseContextPanel(release)}
       ${content}
       <div class="action-row">
         <button class="soft-btn" data-action="pause-release">暂停保存</button>
@@ -1702,7 +1746,8 @@ async function syncLinkedRecord(released, feelsGood) {
 async function appendFeelingToCurrentPath(text) {
   const session = state.data.sessions.find((item) => item.id === state.release.sessionId);
   const record = state.data.topicRecords.find((item) => item.id === session?.recordId);
-  const topic = getTopic(session?.topicId);
+  const baseTopic = getTopic(session?.topicId);
+  const topic = baseTopic && session?.releaseType ? { ...baseTopic, type: session.releaseType } : baseTopic;
   if (!isV2Record(record) || !topic) return;
   const target = findPathTarget(record, state.release.structurePath || session.structurePath);
   const card = makeCard(topic, text);
@@ -1733,6 +1778,14 @@ function ensureGoalRecord(subject, goalId = "") {
   const record = makeStructuredRecord(topic, subject);
   record.goalId = goalId;
   return record;
+}
+
+function currentReleaseTarget() {
+  const session = state.data.sessions.find((item) => item.id === state.release?.sessionId);
+  const record = state.data.topicRecords.find((item) => item.id === session?.recordId);
+  if (!isV2Record(record)) return { session, record: null, section: null, group: null, card: null };
+  const target = findPathTarget(record, state.release.structurePath || session.structurePath);
+  return { session, record, ...target };
 }
 
 async function createStructuredReleaseSession({ topic, subject, sectionKey, groupText = "", feeling, source = "topic-record", goalId = "", actionId = "", record = null }) {
@@ -1946,6 +1999,19 @@ app.addEventListener("click", async (event) => {
     if (good) {
       await saveRound(true, true);
       await syncLinkedRecord(true, true);
+      const target = currentReleaseTarget();
+      if (state.release.topicId === "goal" && target.section?.key === "goal-feelings") {
+        state.releaseSetup = {
+          topicId: "goal",
+          step: "goalAction",
+          subject: state.release.subject,
+          recordId: target.record?.id || target.session?.recordId || ""
+        };
+        await updateSessionStatus("completed", true);
+        state.release = null;
+        setRoute("releaseSetup");
+        return;
+      }
       state.release.step = "continueRelease";
       render();
     } else {
@@ -1960,15 +2026,15 @@ app.addEventListener("click", async (event) => {
     if (keepGoing) {
       const topic = getTopic(state.release.topicId) || FREE_RELEASE_TOPIC;
       const structure = topicStructure(topic);
-      const needsContext = structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id);
+      const needsContext = topic.id !== "goal" && (structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id));
       const recordId = state.data.sessions.find((session) => session.id === state.release.sessionId)?.recordId || "";
       state.releaseSetup = {
         topicId: topic.id,
         releaseType: state.release.releaseType,
-        step: needsContext ? "context" : "feeling",
+        step: topic.id === "goal" ? "goalAction" : needsContext ? "context" : "feeling",
         subject: state.release.subject,
         recordId,
-        sectionKey: structure.sections[0]?.key || "default"
+        sectionKey: topic.id === "goal" ? "goal-actions" : structure.sections[0]?.key || "default"
       };
       await updateSessionStatus("completed", true);
       state.release = null;
@@ -2098,7 +2164,8 @@ app.addEventListener("submit", async (event) => {
   if (form.dataset.form === "update-topic-record") {
     const record = state.data.topicRecords.find((item) => item.id === form.dataset.record);
     if (isV2Record(record)) {
-      const topic = getTopic(record.topicId);
+      const baseTopic = getTopic(record.topicId);
+      const topic = record.releaseType ? { ...baseTopic, type: record.releaseType } : baseTopic;
       record.subject = data.subject;
       record.sections = sectionsFromForm(topic, form, record);
       record.gain = data.gain || "";
@@ -2115,13 +2182,24 @@ app.addEventListener("submit", async (event) => {
   if (form.dataset.form === "release-setup-subject") {
     const topic = getTopic(data.topicId);
     const structure = topicStructure(topic);
-    const needsContext = structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id);
+    const needsContext = topic.id !== "goal" && (structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id));
     state.releaseSetup = {
       topicId: topic.id,
       step: needsContext ? "context" : "feeling",
       subject: data.subject,
-      sectionKey: structure.sections[0]?.key || "default",
+      sectionKey: topic.id === "goal" ? "goal-feelings" : structure.sections[0]?.key || "default",
       recordId: state.releaseSetup?.recordId || ""
+    };
+    render();
+  }
+
+  if (form.dataset.form === "release-setup-goal-action") {
+    state.releaseSetup = {
+      ...state.releaseSetup,
+      topicId: "goal",
+      step: "feeling",
+      sectionKey: "goal-actions",
+      groupText: data.groupText || ""
     };
     render();
   }

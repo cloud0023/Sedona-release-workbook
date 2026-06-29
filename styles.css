@@ -781,6 +781,62 @@ select:focus {
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--surface) 16%, transparent);
 }
 
+.release-context {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  color: var(--ink);
+  background: color-mix(in oklch, var(--surface) 90%, var(--gold));
+  border: 1px solid color-mix(in oklch, var(--gold) 38%, var(--line));
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px oklch(20% 0.025 181 / 0.08);
+}
+
+.release-context-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-sm);
+  align-items: baseline;
+  min-width: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.release-context-line span {
+  color: color-mix(in oklch, var(--teal-dark) 72%, var(--muted));
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.release-context-line span::after {
+  content: "：";
+}
+
+.release-context-line strong {
+  min-width: 0;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.release-context-line.primary strong {
+  color: var(--teal-dark);
+}
+
+.release-context-line:not(:has(strong)) {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px var(--space-sm);
+  color: var(--teal-dark);
+  background: color-mix(in oklch, var(--green) 14%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--green) 30%, var(--line));
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.release-context-line:not(:has(strong)) span::after {
+  content: "";
+}
+
 .emotion-picker-panel {
   padding: var(--space-lg) 0 0;
 }
