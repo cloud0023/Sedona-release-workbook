@@ -487,7 +487,7 @@ function makeCardRow(topic, namePrefix, card = null) {
       <input type="hidden" name="${namePrefix}CardId" value="${escapeHtml(id)}" />
       <input name="${namePrefix}CardText" value="${escapeHtml(card?.text || "")}" placeholder="${fieldName(topic)}" />
       <label class="mini-check"><input type="checkbox" name="${namePrefix}CardReleased" value="${escapeHtml(id || "new")}" ${card?.released ? "checked" : ""} /><span>✓</span><b>释放了吗</b></label>
-      <button class="row-delete-btn" type="button" data-action="remove-structured-card-row" aria-label="删除这一行">×</button>
+      <button class="text-delete-btn card-delete-btn" type="button" data-action="remove-structured-card-row" aria-label="删除这一条${fieldName(topic)}">删除</button>
     </div>
   `;
 }
@@ -1061,26 +1061,59 @@ function groupedSectionFields(topic, structure, section) {
   const definition = structure.sections.find((item) => item.key === section.key);
   return `
     <div class="structured-groups" data-groups>
-      ${(section.groups || []).map((group) => structuredGroupFields(topic, section, group, definition)).join("")}
-      ${!(section.groups || []).length ? structuredGroupFields(topic, section, makeGroup("", [makeCard(topic)]), definition) : ""}
+      ${(section.groups || []).map((group, index) => structuredGroupFields(topic, section, group, definition, index)).join("")}
+      ${!(section.groups || []).length ? structuredGroupFields(topic, section, makeGroup("", [makeCard(topic)]), definition, 0) : ""}
     </div>
     <button class="soft-btn" type="button" data-action="add-structured-group">${addGroupButtonLabel(structure, section)}</button>
   `;
 }
 
-function structuredGroupFields(topic, section, group, definition) {
+function groupTitle(section, index) {
+  const labels = {
+    likes: "方面",
+    dislikes: "方面",
+    benefits: "好处",
+    harms: "坏处",
+    "goal-actions": "行动"
+  };
+  return `${labels[section.key] || "项目"} ${index + 1}`;
+}
+
+function groupPlaceholder(section) {
+  const placeholders = {
+    likes: "例如：他说话很真诚",
+    dislikes: "例如：这件事让我有压力",
+    benefits: "例如：不用面对失败",
+    harms: "例如：一直停在原地",
+    "goal-actions": "写下为了达成目标要做的事"
+  };
+  return placeholders[section.key] || "写下这一项";
+}
+
+function groupGoodLabel(section) {
+  const labels = {
+    likes: "这个方面感觉好吗？",
+    dislikes: "这个方面感觉好吗？",
+    benefits: "这个好处感觉好吗？",
+    harms: "这个坏处感觉好吗？",
+    "goal-actions": "这个行动感觉好吗？"
+  };
+  return labels[section.key] || "感觉好吗？";
+}
+
+function structuredGroupFields(topic, section, group, definition, index = 0) {
   const prefix = `group-${group.id}`;
   return `
     <article class="structured-group" data-group-id="${escapeHtml(group.id)}">
+      <header class="structured-group-head">
+        <h4>${escapeHtml(groupTitle(section, index))}</h4>
+        <button class="text-delete-btn group-delete-btn" type="button" data-action="remove-structured-group" aria-label="删除${escapeHtml(groupTitle(section, index))}">删除</button>
+      </header>
       <div class="field compact-field">
-        <label>${escapeHtml(definition?.groupPrompt || "内容")}</label>
-        <textarea name="${prefix}Text" placeholder="写下这一项">${escapeHtml(group.text || "")}</textarea>
+        <textarea name="${prefix}Text" aria-label="${escapeHtml(definition?.groupPrompt || groupTitle(section, index))}" placeholder="${escapeHtml(groupPlaceholder(section))}">${escapeHtml(group.text || "")}</textarea>
       </div>
       ${directCardsFields(topic, prefix, group.cards || [])}
-      <div class="structured-group-actions">
-        ${goodToggle(`${prefix}FeelsGood`, group.feelsGood)}
-        <button class="row-delete-btn" type="button" data-action="remove-structured-group" aria-label="删除这一组">×</button>
-      </div>
+      ${goodToggle(`${prefix}FeelsGood`, group.feelsGood, groupGoodLabel(section))}
     </article>
   `;
 }
@@ -1100,12 +1133,12 @@ function directCardsFields(topic, prefix, cards) {
   `;
 }
 
-function goodToggle(name, checked) {
+function goodToggle(name, checked, label = "感觉好吗？") {
   return `
     <label class="record-good-toggle">
       <input type="checkbox" name="${escapeHtml(name)}" ${checked ? "checked" : ""} />
       <span class="box-mark">✓</span>
-      <span>感觉好吗？</span>
+      <span>${escapeHtml(label)}</span>
     </label>
   `;
 }
@@ -1979,7 +2012,10 @@ app.addEventListener("click", async (event) => {
     const groupList = section?.querySelector("[data-groups]");
     const sectionKey = section?.dataset.sectionKey;
     const definition = topicStructure(topic).sections.find((item) => item.key === sectionKey);
-    if (groupList) groupList.insertAdjacentHTML("beforeend", structuredGroupFields(topic, { id: section.dataset.sectionId }, makeGroup("", [makeCard(topic)]), definition));
+    if (groupList) {
+      const nextIndex = groupList.querySelectorAll(".structured-group").length;
+      groupList.insertAdjacentHTML("beforeend", structuredGroupFields(topic, { id: section.dataset.sectionId, key: sectionKey }, makeGroup("", [makeCard(topic)]), definition, nextIndex));
+    }
   }
   if (name === "switch-structured-section-tab") {
     const editor = action.closest(".tabbed-structured-editor");

@@ -1131,10 +1131,24 @@ select:focus {
 }
 
 .structured-group {
-  padding: var(--space-md);
-  background: color-mix(in oklch, var(--surface) 92%, var(--gold));
-  border: 1px solid color-mix(in oklch, var(--gold) 36%, var(--line));
+  padding: var(--space-lg);
+  background: color-mix(in oklch, var(--surface) 95%, var(--paper-deep));
+  border: 1px solid color-mix(in oklch, var(--gold) 28%, var(--line));
   border-radius: var(--radius);
+}
+
+.structured-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.structured-group-head h4 {
+  margin: 0;
+  color: var(--teal-dark);
+  font-size: 0.98rem;
+  line-height: 1.25;
 }
 
 .structured-group-actions {
@@ -1147,7 +1161,7 @@ select:focus {
 .release-table-head,
 .release-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px 40px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: var(--space-sm);
   align-items: center;
 }
@@ -1160,6 +1174,13 @@ select:focus {
 
 .release-table-row input[name$="CardText"] {
   min-width: 0;
+}
+
+.release-table-row {
+  padding: var(--space-sm);
+  background: color-mix(in oklch, var(--paper) 42%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--line) 70%, transparent);
+  border-radius: calc(var(--radius) - 4px);
 }
 
 .mini-check {
@@ -1213,6 +1234,26 @@ select:focus {
   font-weight: 900;
 }
 
+.text-delete-btn {
+  min-height: 36px;
+  padding: 0 var(--space-xs);
+  color: color-mix(in oklch, var(--muted) 82%, oklch(42% 0.1 25));
+  background: transparent;
+  border: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.text-delete-btn:hover,
+.text-delete-btn:focus-visible {
+  color: oklch(38% 0.11 25);
+  background: color-mix(in oklch, var(--rose) 12%, transparent);
+}
+
+.group-delete-btn {
+  justify-self: end;
+}
+
 .release-item-list {
   display: grid;
   gap: var(--space-sm);
@@ -1236,7 +1277,7 @@ select:focus {
 
 .record-good-toggle {
   grid-template-columns: 24px 1fr;
-  background: color-mix(in oklch, var(--gold) 20%, var(--surface));
+  background: color-mix(in oklch, var(--gold) 14%, var(--surface));
   font-weight: 800;
   cursor: pointer;
 }
@@ -1464,6 +1505,10 @@ select:focus {
     padding: var(--space-md);
   }
 
+  .structured-group-head {
+    align-items: flex-start;
+  }
+
   .release-table-head {
     display: none;
   }
@@ -1474,10 +1519,10 @@ select:focus {
       "text text"
       "check delete";
     gap: var(--space-sm);
-    padding: var(--space-md);
-    background: color-mix(in oklch, var(--surface) 94%, var(--paper-deep));
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    padding: var(--space-sm);
+    background: color-mix(in oklch, var(--paper) 50%, var(--surface));
+    border: 1px solid color-mix(in oklch, var(--line) 68%, transparent);
+    border-radius: calc(var(--radius) - 4px);
   }
 
   .release-table-row input[name$="CardText"] {
@@ -1503,6 +1548,14 @@ select:focus {
   .release-table-row .row-delete-btn {
     grid-area: delete;
     justify-self: end;
+  }
+
+  .release-table-row .card-delete-btn {
+    grid-area: delete;
+    justify-self: end;
+    align-self: center;
+    min-height: 44px;
+    color: color-mix(in oklch, var(--muted) 86%, oklch(42% 0.1 25));
   }
 
   .structured-group-actions {
