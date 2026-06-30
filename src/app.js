@@ -588,6 +588,24 @@ function sectionHeadingLabel(structure, section) {
   return section.heading || sectionLabel(structure, section);
 }
 
+function sectionDefinition(structure, section) {
+  return structure.sections?.find((item) => item.key === section?.key) || section || {};
+}
+
+function groupInputLabel(structure, section, unit) {
+  const definition = sectionDefinition(structure, section);
+  return definition.groupPrompt || section?.groupPrompt || `${unit}内容`;
+}
+
+function groupContextLine(topic, structure, record, section) {
+  const subject = (record?.subject || "").trim();
+  const defaultSubject = defaultTopicRecordSubject(topic);
+  const parts = [topic.title];
+  if (subject && subject !== defaultSubject) parts.push(subject);
+  parts.push(sectionLabel(structure, section));
+  return parts.join(" · ");
+}
+
 function groupUnitLabel(structure, section) {
   if (structure.type === "likes-dislikes") return "方面";
   if (structure.type === "stuckness") return section.key === "benefits" ? "好处" : "坏处";
@@ -1381,10 +1399,10 @@ function topicGroupEditPage(topic, record) {
   return appFrame(`
     <main class="screen group-edit-screen">
       <h1 class="screen-title">${escapeHtml(unit)}详情</h1>
-      <p class="context-line">${escapeHtml(topic.title)} · ${escapeHtml(sectionLabel(structure, section))}</p>
+      <p class="context-line">${escapeHtml(groupContextLine(topic, structure, record, section))}</p>
       <form class="progressive-form" data-form="topic-group-card">
         <section class="progressive-section">
-          <label class="field-label">${escapeHtml(section.groupPrompt || `${unit}内容`)}</label>
+          <label class="field-label">${escapeHtml(groupInputLabel(structure, section, unit))}</label>
           <input name="groupText" data-draft-group-field="text" value="${escapeHtml(group.text || "")}" placeholder="${escapeHtml(groupPlaceholder(section))}" />
         </section>
         <section class="progressive-section">
