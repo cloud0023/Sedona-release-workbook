@@ -287,7 +287,77 @@ function splitEntries(value = "") {
 
 const STRUCTURED_SCHEMA_VERSION = 2;
 
-const COMPLEX_TOPIC_IDS = new Set(["success", "likes-dislikes", "stuckness", "goal"]);
+const ITEMIZED_TOPIC_SUBJECTS = {
+  "suppress-express": "压抑或表达",
+  "remember-approval-control": "想要被认同和控制",
+  "letting-go-wants": "想要和不想要的东西",
+  "want-control": "从想要控制能得到什么",
+  "want-approval": "从想要认同能得到什么",
+  "seeing-wants": "获得三大想要的方式",
+  happiness: "快乐需要什么"
+};
+
+const ITEMIZED_TOPIC_STRUCTURES = {
+  "suppress-express": {
+    type: "itemized",
+    groupLabel: "事情",
+    sections: [
+      { key: "suppressed", title: "压抑", groupPrompt: "当时压抑情绪的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" },
+      { key: "expressed", title: "表达", groupPrompt: "当时表达情绪的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" }
+    ]
+  },
+  "remember-approval-control": {
+    type: "itemized",
+    groupLabel: "事情",
+    sections: [
+      { key: "approval", title: "想要被认同", groupPrompt: "想要被认同的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" },
+      { key: "control", title: "想要控制", groupPrompt: "想要控制的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" }
+    ]
+  },
+  "letting-go-wants": {
+    type: "itemized",
+    groupLabel: "内容",
+    sections: [
+      { key: "wants", title: "想要", groupPrompt: "我想要什么？", groupLabel: "内容", goodLabel: "这个想要感觉好吗？" },
+      { key: "not-wants", title: "不想要", groupPrompt: "我不想要什么？", groupLabel: "内容", goodLabel: "这个不想要感觉好吗？" }
+    ]
+  },
+  "want-control": {
+    type: "itemized",
+    groupLabel: "答案",
+    sections: [
+      { key: "control-gains", title: "想要控制", groupPrompt: "从想要控制中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" },
+      { key: "controlled-gains", title: "想要被控制", groupPrompt: "从想要被控制中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" }
+    ]
+  },
+  "want-approval": {
+    type: "itemized",
+    groupLabel: "答案",
+    sections: [
+      { key: "approval-gains", title: "想要被认同", groupPrompt: "从想要被认同中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" },
+      { key: "disapproval-gains", title: "想要不被认同", groupPrompt: "从想要不被认同中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" }
+    ]
+  },
+  "seeing-wants": {
+    type: "itemized",
+    groupLabel: "方式",
+    sections: [
+      { key: "approval-seeking", title: "寻求被认同", groupPrompt: "我怎样寻求被认同？", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" },
+      { key: "security-seeking", title: "寻求安全", groupPrompt: "我怎样寻求安全？", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" },
+      { key: "control-seeking", title: "试图控制", groupPrompt: "我怎样试图控制？", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" }
+    ]
+  },
+  happiness: {
+    type: "itemized",
+    groupLabel: "条件",
+    sections: [
+      { key: "needs", title: "需要", groupPrompt: "我需要什么才能获得快乐？", groupLabel: "条件", goodLabel: "这个需要感觉好吗？" },
+      { key: "avoidance", title: "避免", groupPrompt: "我需要避免什么才能获得快乐？", groupLabel: "条件", goodLabel: "这个避免感觉好吗？" }
+    ]
+  }
+};
+
+const COMPLEX_TOPIC_IDS = new Set(["success", "likes-dislikes", "stuckness", "goal", ...Object.keys(ITEMIZED_TOPIC_STRUCTURES)]);
 
 const TOPIC_STRUCTURES = {
   success: {
@@ -325,6 +395,7 @@ const TOPIC_STRUCTURES = {
 
 function topicStructure(topic) {
   if (TOPIC_STRUCTURES[topic.id]) return TOPIC_STRUCTURES[topic.id];
+  if (ITEMIZED_TOPIC_STRUCTURES[topic.id]) return ITEMIZED_TOPIC_STRUCTURES[topic.id];
   if (topic.columns?.length) {
     return {
       type: "columns",
@@ -345,6 +416,7 @@ function sectionCanHaveGroups(structure, sectionKey) {
   return (
     structure.type === "likes-dislikes" ||
     structure.type === "stuckness" ||
+    structure.type === "itemized" ||
     (structure.type === "goal" && sectionKey === "goal-actions")
   );
 }
@@ -395,13 +467,14 @@ function makeSection(definition, withGroups = false) {
 function makeStructuredRecord(topic, subject = "") {
   const structure = topicStructure(topic);
   const stamp = nowIso();
+  const recordSubject = subject || defaultTopicRecordSubject(topic);
   return {
     id: uid("topic"),
     topicId: topic.id,
     schemaVersion: STRUCTURED_SCHEMA_VERSION,
     structureType: structure.type,
     releaseType: topic.type,
-    subject,
+    subject: recordSubject,
     sections: structure.sections.map((section) => makeSection(section, sectionCanHaveGroups(structure, section.key))),
     gain: "",
     createdAt: stamp,
@@ -484,6 +557,14 @@ function draftRecord() {
   return state.editingDraftRecord;
 }
 
+function defaultTopicRecordSubject(topic) {
+  return ITEMIZED_TOPIC_SUBJECTS[topic?.id] || "";
+}
+
+function topicUsesDefaultSubject(topic) {
+  return Boolean(defaultTopicRecordSubject(topic));
+}
+
 function sectionLabel(structure, section) {
   return sectionTabLabel(structure, section);
 }
@@ -492,11 +573,13 @@ function groupUnitLabel(structure, section) {
   if (structure.type === "likes-dislikes") return "方面";
   if (structure.type === "stuckness") return section.key === "benefits" ? "好处" : "坏处";
   if (structure.type === "goal" && section.key === "goal-actions") return "行动";
+  if (structure.type === "itemized") return section.groupLabel || structure.groupLabel || "条目";
   return "条目";
 }
 
 function addGroupLabelForSection(structure, section) {
   const unit = groupUnitLabel(structure, section);
+  if (unit === "事情") return "添加一件事情";
   return `添加一个${unit}`;
 }
 
@@ -1187,6 +1270,8 @@ function topicRecordEditPage(topic, record) {
   const structure = topicStructure(topic);
   const section = findSection(record, state.editingSectionKey) || record.sections[0];
   if (!state.editingSectionKey && section) state.editingSectionKey = section.key;
+  const fixedSubject = topicUsesDefaultSubject(topic);
+  if (fixedSubject && !record.subject) record.subject = defaultTopicRecordSubject(topic);
   return appFrame(`
     <main class="screen record-edit-screen">
       <div class="edit-kicker">${iconBubble(topicIconName(topic), "tiny-leaf")}<span>${topic.title}</span></div>
@@ -1194,7 +1279,9 @@ function topicRecordEditPage(topic, record) {
       <form class="progressive-form" data-form="topic-record-card" data-record="${escapeHtml(record.id)}">
         <section class="quiet-card subject-card">
           <label class="field-label">主题</label>
-          <input name="subject" data-draft-field="subject" value="${escapeHtml(record.subject || "")}" placeholder="写下这一项" required />
+          ${fixedSubject
+            ? `<input type="hidden" name="subject" value="${escapeHtml(record.subject || defaultTopicRecordSubject(topic))}" /><div class="fixed-subject">${escapeHtml(record.subject || defaultTopicRecordSubject(topic))}</div>`
+            : `<input name="subject" data-draft-field="subject" value="${escapeHtml(record.subject || "")}" placeholder="写下这一项" required />`}
           ${record.sections.length > 1 ? recordSectionSegmented(structure, record, section) : ""}
         </section>
         ${section ? recordSectionEditor(topic, structure, record, section) : ""}
@@ -1271,13 +1358,14 @@ function topicGroupEditPage(topic, record) {
     state.topicRecordView = "record";
     return topicRecordEditPage(topic, record);
   }
+  const unit = groupUnitLabel(structure, section);
   return appFrame(`
     <main class="screen group-edit-screen">
-      <h1 class="screen-title">方面详情</h1>
+      <h1 class="screen-title">${escapeHtml(unit)}详情</h1>
       <p class="context-line">${escapeHtml(topic.title)} · ${escapeHtml(record.subject || "未命名释放")}</p>
       <form class="progressive-form" data-form="topic-group-card">
         <section class="progressive-section">
-          <label class="field-label">${escapeHtml(groupUnitLabel(structure, section))}内容</label>
+          <label class="field-label">${escapeHtml(section.groupPrompt || `${unit}内容`)}</label>
           <input name="groupText" data-draft-group-field="text" value="${escapeHtml(group.text || "")}" placeholder="${escapeHtml(groupPlaceholder(section))}" />
         </section>
         <section class="progressive-section">
@@ -1289,7 +1377,7 @@ function topicGroupEditPage(topic, record) {
           <h2 class="feels-question">${escapeHtml(groupGoodLabel(section))}</h2>
           ${feelsGoodSegment("group", group.feelsGood, groupGoodLabel(section))}
         </section>
-        <button class="primary-btn save-record-btn" type="submit">保存${escapeHtml(groupUnitLabel(structure, section))}</button>
+        <button class="primary-btn save-record-btn" type="submit">保存${escapeHtml(unit)}</button>
       </form>
     </main>
   `);
@@ -1441,6 +1529,7 @@ function addGroupButtonLabel(structure, section) {
   if (structure.type === "likes-dislikes") return section.key === "likes" ? "添加喜欢的方面" : "添加不喜欢的方面";
   if (structure.type === "stuckness") return section.key === "benefits" ? "添加好处" : "添加坏处";
   if (structure.type === "goal") return "添加行动";
+  if (structure.type === "itemized") return addGroupLabelForSection(structure, section);
   return `添加${sectionTabLabel(structure, section)}`;
 }
 
@@ -1478,7 +1567,7 @@ function groupTitle(section, index) {
     harms: "坏处",
     "goal-actions": "行动"
   };
-  return `${labels[section.key] || "项目"} ${index + 1}`;
+  return `${labels[section.key] || section.groupLabel || "项目"} ${index + 1}`;
 }
 
 function groupPlaceholder(section) {
@@ -1489,7 +1578,7 @@ function groupPlaceholder(section) {
     harms: "例如：一直停在原地",
     "goal-actions": "写下为了达成目标要做的事"
   };
-  return placeholders[section.key] || "写下这一项";
+  return placeholders[section.key] || section.groupPrompt || "写下这一项";
 }
 
 function groupGoodLabel(section) {
@@ -1500,7 +1589,7 @@ function groupGoodLabel(section) {
     harms: "这个坏处感觉好吗？",
     "goal-actions": "这个行动感觉好吗？"
   };
-  return labels[section.key] || "感觉好吗？";
+  return labels[section.key] || section.goodLabel || "感觉好吗？";
 }
 
 function structuredGroupFields(topic, section, group, definition, index = 0) {
@@ -1743,12 +1832,13 @@ function releaseSetupView() {
   const isContextStep = setup.step === "context";
   const isGoalActionStep = setup.step === "goalAction";
   const isFeelingStep = setup.step === "feeling";
+  const itemizedContext = isContextStep && structure.type === "itemized";
   const prompt = isSubjectStep
     ? topic.fields[0]
     : isGoalActionStep
       ? "为了达成目标要做什么？"
       : isContextStep
-      ? "这次释放属于哪一部分？"
+      ? (itemizedContext ? (selectedSection?.groupPrompt || "先写下具体释放的内容") : "这次释放属于哪一部分？")
       : feelingLabel(topic);
   return appFrame(`
     <main class="release-stage">
@@ -1767,7 +1857,7 @@ function releaseSetupView() {
             ${structure.sections.map((section) => `<option value="${section.key}" ${setup.sectionKey === section.key ? "selected" : ""}>${section.title}</option>`).join("")}
           </select>
           ${hasGroupedSection ? `
-            <textarea name="groupText" placeholder="${escapeHtml(selectedSection?.groupPrompt || "方面/行动内容，选择对应分区时填写")}">${escapeHtml(setup.groupText || "")}</textarea>
+            <textarea name="groupText" ${itemizedContext ? "required" : ""} placeholder="${escapeHtml(selectedSection?.groupPrompt || "方面/行动内容，选择对应分区时填写")}">${escapeHtml(setup.groupText || "")}</textarea>
           ` : ""}
         ` : ""}
         ${isFeelingStep ? `<input name="feeling" required placeholder="${topic.type === "want" ? "现在最明显的想要是什么？" : "现在最明显的感受是什么？"}" />` : ""}
@@ -1816,6 +1906,8 @@ function releaseContextLines(release) {
       lines.push({ label: section.key === "benefits" ? "好处" : "坏处", value: group.text });
     } else if (topic.id === "goal" && group?.text) {
       lines.push({ label: "行动", value: group.text });
+    } else if (topicStructure(topic).type === "itemized" && group?.text) {
+      lines.push({ label: section.title || groupUnitLabel(topicStructure(topic), section), value: group.text });
     } else if (topic.id !== "goal" && topic.id !== FREE_RELEASE_TOPIC.id && section.key !== "default" && section.title !== feelingLabel(topic)) {
       lines.push({ label: "归属", value: section.title });
     }
@@ -2357,7 +2449,15 @@ app.addEventListener("click", async (event) => {
   if (name === "start-selected-topic") {
     const select = document.querySelector("#topicSelect");
     const topic = getTopic(select.value);
-    state.releaseSetup = { topicId: topic.id, step: "subject", subject: "" };
+    const structure = topicStructure(topic);
+    const needsContext = topic.id !== "goal" && (structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id));
+    const defaultSubject = defaultTopicRecordSubject(topic);
+    state.releaseSetup = {
+      topicId: topic.id,
+      step: defaultSubject && needsContext ? "context" : "subject",
+      subject: defaultSubject,
+      sectionKey: structure.sections[0]?.key || "default"
+    };
     setRoute("releaseSetup");
   }
   if (name === "select-emotion") {
@@ -2822,6 +2922,9 @@ app.addEventListener("submit", async (event) => {
 
   if (form.dataset.form === "topic-group-card") {
     const group = currentDraftGroup();
+    const structure = currentTopicStructure();
+    const section = currentDraftSection();
+    const unit = section ? groupUnitLabel(structure, section) : "条目";
     if (group) {
       group.text = data.groupText || group.text || "";
       group.updatedAt = nowIso();
@@ -2832,7 +2935,7 @@ app.addEventListener("submit", async (event) => {
     state.editingGroupId = "";
     state.expandedCardId = "";
     render();
-    showToast("方面已保存");
+    showToast(`${unit}已保存`);
     return;
   }
 
@@ -2872,10 +2975,11 @@ app.addEventListener("submit", async (event) => {
     const topic = getTopic(data.topicId);
     const structure = topicStructure(topic);
     const needsContext = topic.id !== "goal" && (structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id));
+    const subject = data.subject || defaultTopicRecordSubject(topic);
     state.releaseSetup = {
       topicId: topic.id,
       step: needsContext ? "context" : "feeling",
-      subject: data.subject,
+      subject,
       sectionKey: topic.id === "goal" ? "goal-feelings" : structure.sections[0]?.key || "default",
       recordId: state.releaseSetup?.recordId || ""
     };

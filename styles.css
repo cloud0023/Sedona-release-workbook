@@ -1973,6 +1973,19 @@ select:focus {
   border-radius: 50%;
 }
 
+.fixed-subject {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-md);
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 800;
+  background: color-mix(in oklch, var(--paper) 82%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--line) 78%, transparent);
+  border-radius: 14px;
+}
+
 .record-section-switch {
   display: grid;
   gap: var(--space-sm);
