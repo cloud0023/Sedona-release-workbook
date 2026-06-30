@@ -1048,9 +1048,11 @@ function structuredSectionFields(topic, structure, section, options = {}) {
     <section class="structured-section ${options.tabbed ? "structured-tab-panel" : ""} ${options.active ? "active" : ""}" data-section-id="${escapeHtml(section.id)}" data-section-key="${escapeHtml(section.key)}" ${options.tabbed && !options.active ? "hidden" : ""}>
       <header class="structured-section-head">
         <h3>${escapeHtml(section.title)}</h3>
-        ${grouped ? "" : goodToggle(`section-${section.id}FeelsGood`, section.feelsGood)}
       </header>
-      ${grouped ? groupedSectionFields(topic, structure, section) : directCardsFields(topic, `section-${section.id}`, section.cards || [])}
+      ${grouped ? groupedSectionFields(topic, structure, section) : `
+        ${directCardsFields(topic, `section-${section.id}`, section.cards || [])}
+        ${goodToggle(`section-${section.id}FeelsGood`, section.feelsGood)}
+      `}
     </section>
   `;
 }
@@ -1101,9 +1103,9 @@ function directCardsFields(topic, prefix, cards) {
 function goodToggle(name, checked) {
   return `
     <label class="record-good-toggle">
-      <span class="box-mark">${checked ? "✓" : ""}</span>
-      <span>感觉好吗？</span>
       <input type="checkbox" name="${escapeHtml(name)}" ${checked ? "checked" : ""} />
+      <span class="box-mark">✓</span>
+      <span>感觉好吗？</span>
     </label>
   `;
 }

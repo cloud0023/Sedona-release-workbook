@@ -1083,6 +1083,10 @@ select:focus {
   gap: var(--space-md);
 }
 
+.structured-tab-panel[hidden] {
+  display: none;
+}
+
 .structured-tabs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
@@ -1235,6 +1239,18 @@ select:focus {
   background: color-mix(in oklch, var(--gold) 20%, var(--surface));
   font-weight: 800;
   cursor: pointer;
+}
+
+.record-good-toggle .box-mark {
+  color: transparent;
+  background: transparent;
+  border-color: var(--soft);
+}
+
+.record-good-toggle input:checked + .box-mark {
+  color: var(--surface);
+  background: var(--teal);
+  border-color: var(--teal);
 }
 
 .gain-note {
