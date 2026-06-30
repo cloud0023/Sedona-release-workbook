@@ -1293,7 +1293,6 @@ function materialsView() {
             ${items.map((item) => `
               <button class="${item.page === page ? "active" : ""}" type="button" data-action="open-material-page" data-page="${item.page}">
                 <strong>${escapeHtml(item.title)}</strong>
-                <span>${escapeHtml(item.meta)}</span>
               </button>
             `).join("")}
           </div>
