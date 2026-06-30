@@ -230,6 +230,8 @@ const state = {
   editingDraftRecord: null,
   editingSectionKey: "",
   editingGroupId: "",
+  expandedRecordId: "",
+  expandedGroupId: "",
   expandedCardId: "",
   focusCardId: "",
   releaseSetup: null,
@@ -533,6 +535,27 @@ function recordSummary(topic, record, sectionKey = "") {
       : `${label} ${stats.cardCount} 个${fieldName(topic)}`,
     secondary: `${stats.released}/${stats.cardCount} 已释放 · ${stats.feelsGood ? "感觉好了" : "感觉还不好"}`
   };
+}
+
+function recordSectionSummaries(topic, record) {
+  const structure = topicStructure(topic);
+  const sections = record.sections || [];
+  return sections.map((section) => {
+    const stats = sectionStats(section);
+    const hasGroups = sectionCanHaveGroups(structure, section.key);
+    const unit = groupUnitLabel(structure, section);
+    const label = sectionLabel(structure, section);
+    return {
+      section,
+      stats,
+      label,
+      primary: hasGroups
+        ? `${label} ${stats.groupCount} 个${unit} · ${stats.cardCount} 个${fieldName(topic)}`
+        : `${label} ${stats.cardCount} 个${fieldName(topic)}`,
+      release: `${stats.released}/${stats.cardCount} 已释放`,
+      good: stats.feelsGood
+    };
+  });
 }
 
 function groupSummary(topic, section, group) {
@@ -1137,21 +1160,25 @@ function topicDetailView() {
 }
 
 function topicRecordSummaryCard(topic, record) {
-  const summary = recordSummary(topic, record);
-  const good = recordIsGood(record);
+  const summaries = recordSectionSummaries(topic, record);
+  const expanded = state.expandedRecordId === record.id;
   return `
-    <button class="release-record-card" type="button" data-action="edit-topic-record-card" data-record="${record.id}">
+    <article class="release-record-card ${expanded ? "expanded" : ""}">
       ${iconBubble(topicIconName(topic), "release-record-icon")}
-      <span class="release-record-main">
+      <button class="release-record-main" type="button" data-action="edit-topic-record-card" data-record="${record.id}">
         <strong>${escapeHtml(record.subject || "未命名释放")}</strong>
         <small>${formatDate(record.createdAt)}</small>
         <span class="record-chip-row">
-          <span class="summary-chip">${escapeHtml(summary.primary)}</span>
-          <span class="summary-chip">${summary.stats.released}/${summary.stats.cardCount} 已释放</span>
-          <span class="summary-chip good-chip ${good ? "is-good" : "not-good"}">${good ? "感觉好了" : "还没感觉好"}</span>
+          ${summaries.map((summary) => `
+            <span class="summary-chip">${escapeHtml(summary.primary)}</span>
+            <span class="summary-chip">${summary.release}</span>
+            <span class="summary-chip good-chip ${summary.good ? "is-good" : "not-good"}">${summary.good ? "感觉好了" : "还没感觉好"}</span>
+          `).join("")}
         </span>
-      </span>
-    </button>
+      </button>
+      <button class="chevron-btn record-expand-btn" type="button" data-action="toggle-record-actions" data-record="${record.id}" aria-label="展开记录操作">›</button>
+      ${expanded ? `<button class="text-delete-btn record-inline-delete" type="button" data-action="delete-record" data-record="${record.id}">删除记录</button>` : ""}
+    </article>
   `;
 }
 
@@ -1218,19 +1245,21 @@ function recordSectionEditor(topic, structure, record, section) {
 
 function groupSummaryCard(topic, structure, section, group) {
   const summary = groupSummary(topic, section, group);
+  const expanded = state.expandedGroupId === group.id;
   return `
-    <button class="group-summary-card" type="button" data-action="edit-progressive-group" data-section-key="${escapeHtml(section.key)}" data-group="${escapeHtml(group.id)}">
+    <article class="group-summary-card ${expanded ? "expanded" : ""}">
       ${iconBubble(topicIconName(topic), "group-summary-icon")}
-      <span class="group-summary-main">
+      <button class="group-summary-main" type="button" data-action="edit-progressive-group" data-section-key="${escapeHtml(section.key)}" data-group="${escapeHtml(group.id)}">
         <strong>${escapeHtml(group.text || `未命名${groupUnitLabel(structure, section)}`)}</strong>
         <small>${escapeHtml(summary.preview)}</small>
         <span class="record-chip-row">
           <span class="summary-chip">${summary.released}/${summary.total} 已释放</span>
           <span class="summary-chip good-chip ${summary.feelsGood ? "is-good" : "not-good"}">${summary.feelsGood ? "感觉好了" : "还没感觉好"}</span>
         </span>
-      </span>
-      <span class="chevron">›</span>
-    </button>
+      </button>
+      <button class="chevron-btn group-expand-btn" type="button" data-action="toggle-group-actions" data-section-key="${escapeHtml(section.key)}" data-group="${escapeHtml(group.id)}" aria-label="展开${escapeHtml(groupUnitLabel(structure, section))}操作">›</button>
+      ${expanded ? `<button class="text-delete-btn group-inline-delete" type="button" data-action="delete-progressive-group" data-section-key="${escapeHtml(section.key)}" data-group="${escapeHtml(group.id)}">删除${escapeHtml(groupUnitLabel(structure, section))}</button>` : ""}
+    </article>
   `;
 }
 
@@ -1304,6 +1333,8 @@ function resetTopicRecordEditing() {
   state.editingDraftRecord = null;
   state.editingSectionKey = "";
   state.editingGroupId = "";
+  state.expandedRecordId = "";
+  state.expandedGroupId = "";
   state.expandedCardId = "";
   state.focusCardId = "";
 }
@@ -1315,6 +1346,8 @@ function beginTopicRecordDraft(topic, record = null) {
   state.editingDraftRecord = draft;
   state.editingSectionKey = draft.sections[0]?.key || "";
   state.editingGroupId = "";
+  state.expandedRecordId = "";
+  state.expandedGroupId = "";
   state.expandedCardId = "";
   state.focusCardId = "";
   state.topicRecordView = "record";
@@ -2386,9 +2419,14 @@ app.addEventListener("click", async (event) => {
       render();
     }
   }
+  if (name === "toggle-record-actions") {
+    state.expandedRecordId = state.expandedRecordId === action.dataset.record ? "" : action.dataset.record;
+    render();
+  }
   if (name === "switch-record-section") {
     state.editingSectionKey = action.dataset.sectionKey;
     state.editingGroupId = "";
+    state.expandedGroupId = "";
     state.expandedCardId = "";
     render();
   }
@@ -2409,9 +2447,25 @@ app.addEventListener("click", async (event) => {
   if (name === "edit-progressive-group") {
     state.editingSectionKey = action.dataset.sectionKey;
     state.editingGroupId = action.dataset.group;
+    state.expandedGroupId = "";
     state.expandedCardId = "";
     state.topicRecordView = "group";
     render();
+  }
+  if (name === "toggle-group-actions") {
+    state.expandedGroupId = state.expandedGroupId === action.dataset.group ? "" : action.dataset.group;
+    render();
+  }
+  if (name === "delete-progressive-group") {
+    const record = draftRecord();
+    const section = record ? findSection(record, action.dataset.sectionKey) : null;
+    if (section) {
+      section.groups = (section.groups || []).filter((group) => group.id !== action.dataset.group);
+      section.updatedAt = nowIso();
+      record.updatedAt = nowIso();
+      state.expandedGroupId = "";
+      render();
+    }
   }
   if (name === "add-progressive-card") {
     const topic = getTopic(state.topicId) || TOPICS[0];

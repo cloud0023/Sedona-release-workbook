@@ -1837,8 +1837,9 @@ select:focus {
 .release-record-card,
 .group-summary-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: var(--space-lg);
+  align-items: center;
   width: 100%;
   padding: var(--space-lg);
   color: var(--ink);
@@ -1847,11 +1848,6 @@ select:focus {
   border: 1px solid color-mix(in oklch, var(--green) 20%, var(--line));
   border-radius: calc(var(--radius) + 10px);
   box-shadow: 0 14px 34px oklch(32% 0.035 90 / 0.08);
-}
-
-.release-record-card:active,
-.group-summary-card:active {
-  transform: translateY(1px);
 }
 
 .release-record-icon,
@@ -1865,6 +1861,11 @@ select:focus {
   display: grid;
   gap: var(--space-xs);
   min-width: 0;
+  min-height: 58px;
+  padding: 0;
+  color: var(--ink);
+  text-align: left;
+  background: transparent;
 }
 
 .release-record-main strong,
@@ -1887,6 +1888,7 @@ select:focus {
   flex-wrap: wrap;
   gap: var(--space-sm);
   margin-top: var(--space-sm);
+  min-width: 0;
 }
 
 .summary-chip {
@@ -1894,12 +1896,14 @@ select:focus {
   align-items: center;
   min-height: 30px;
   padding: 0 var(--space-sm);
+  max-width: 100%;
   color: color-mix(in oklch, var(--muted) 82%, var(--ink));
   background: color-mix(in oklch, var(--surface) 76%, var(--paper));
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) + 2px);
   font-size: 0.84rem;
   line-height: 1;
+  white-space: normal;
 }
 
 .good-chip::before {
@@ -2040,11 +2044,6 @@ select:focus {
   font-weight: 800;
 }
 
-.group-summary-card {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-}
-
 .chevron,
 .chevron-btn {
   color: var(--muted);
@@ -2113,6 +2112,13 @@ select:focus {
   color: oklch(38% 0.11 25);
 }
 
+.record-inline-delete,
+.group-inline-delete {
+  grid-column: 2 / -1;
+  justify-self: end;
+  color: oklch(38% 0.11 25);
+}
+
 .save-record-btn {
   display: inline-flex;
   align-items: center;
@@ -2125,6 +2131,30 @@ select:focus {
 .calm-empty {
   border-style: dashed;
   box-shadow: none;
+}
+
+.release-record-card,
+.group-summary-card {
+  grid-template-columns: auto minmax(0, 1fr) 34px;
+}
+
+.release-record-main,
+.group-summary-main {
+  width: 100%;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  justify-items: start;
+  align-content: center;
+}
+
+.release-record-main strong,
+.release-record-main small,
+.group-summary-main strong,
+.group-summary-main small,
+.release-record-main .record-chip-row,
+.group-summary-main .record-chip-row {
+  text-align: left;
 }
 
 .emotion-reference-head span {
