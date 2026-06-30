@@ -1335,7 +1335,7 @@ function topicRecordEditPage(topic, record) {
 function recordSectionSegmented(structure, record, activeSection) {
   return `
     <div class="record-section-switch" role="tablist" aria-label="记录分区">
-      <span class="switch-label">${escapeHtml(structure.switchLabel || "我正在看它的")}</span>
+      <span class="switch-label">${escapeHtml(structure.switchLabel || "释放的角度")}</span>
       <span class="segmented-control">
         ${record.sections.map((section) => `
           <button class="${section.key === activeSection.key ? "active" : ""}" type="button" data-action="switch-record-section" data-section-key="${escapeHtml(section.key)}">${escapeHtml(sectionLabel(structure, section))}</button>
