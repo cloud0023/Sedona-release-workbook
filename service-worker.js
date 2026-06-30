@@ -1,11 +1,12 @@
-const CACHE_NAME = "sedona-workbook-v31";
+const CACHE_NAME = "sedona-workbook-v32";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./src/app.js",
   "./manifest.json",
-  "./icons/icon.svg"
+  "./icons/icon.svg",
+  "./92年资料-释放法配套练习本7649484604780677392.pdf"
 ];
 
 self.addEventListener("install", (event) => {

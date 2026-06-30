@@ -1374,6 +1374,83 @@ select:focus {
   border-radius: var(--radius);
 }
 
+.material-open-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.materials-reader {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.materials-toc {
+  display: grid;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: color-mix(in oklch, var(--surface) 94%, var(--paper));
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 10px);
+}
+
+.materials-toc h2 {
+  margin: 0;
+  color: var(--teal-dark);
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+.materials-toc-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: var(--space-sm);
+}
+
+.materials-toc-list button {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-height: 58px;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--ink);
+  text-align: left;
+  background: color-mix(in oklch, var(--paper) 74%, var(--surface));
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 6px);
+}
+
+.materials-toc-list button.active {
+  color: var(--surface);
+  background: var(--teal);
+  border-color: color-mix(in oklch, var(--teal) 76%, var(--line));
+}
+
+.materials-toc-list strong {
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.materials-toc-list span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.materials-toc-list button.active span {
+  color: color-mix(in oklch, var(--surface) 82%, var(--gold));
+}
+
+.pdf-reader {
+  width: 100%;
+  min-height: min(72vh, 760px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 10px);
+}
+
 .dialog-backdrop {
   position: fixed;
   inset: 0;

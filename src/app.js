@@ -24,6 +24,8 @@ const FREE_RELEASE_TOPIC = {
   guidance: "不限定练习本主题，记录任何一次当下想做的释放。"
 };
 
+const MATERIALS_PDF_FILE = "92年资料-释放法配套练习本7649484604780677392.pdf";
+
 const EMOTION_GROUPS = [
   {
     name: "万念俱灰",
@@ -237,6 +239,7 @@ const state = {
   releaseSetup: null,
   sessionId: null,
   release: null,
+  pdfPage: 1,
   toast: "",
   dialog: null,
   data: {
@@ -694,6 +697,7 @@ function iconSvg(name) {
   const icons = {
     home: `<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/>`,
     topics: `<path d="M7 4h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"/><path d="M10 8h4"/><path d="M10 12h4"/>`,
+    materials: `<path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/>`,
     release: `<path d="M12 21c-4.2-2.2-7-5.6-7-9.7V5.8L12 3l7 2.8v5.5c0 4.1-2.8 7.5-7 9.7Z"/><path d="M9 12.4c2.6-.1 4.4-1.2 5.5-3.4.7 3.5-.8 6-4.5 7.4"/><path d="M10 16.4c.8-2.1 2.1-3.7 4-4.7"/>`,
     gains: `<path d="M12 21v-7"/><path d="M7 9c3.2 0 5 1.8 5 5-3.2 0-5-1.8-5-5Z"/><path d="M17 7c-3.2 0-5 2-5 5 3.2 0 5-2 5-5Z"/><path d="M5 21h14"/>`,
     goals: `<path d="M12 21v-6"/><path d="M6 12c3.6 0 6 1.8 6 5-3.6 0-6-1.8-6-5Z"/><path d="M18 8c-3.6 0-6 2-6 5 3.6 0 6-2 6-5Z"/><path d="M12 4v4"/>`,
@@ -1199,8 +1203,8 @@ function homeView() {
       <section class="entry-grid">
         ${entryCard("topics", "topics", "主题释放数据库", "按原书目录进入主题，查看资料提醒，并以卡片方式填写。")}
         ${entryCard("releaseStart", "release", "开始释放", "主题释放或自由释放，系统按情绪/想要切换引导问题。")}
+        ${entryCard("materials", "materials", "释放资料", "查看 92 年资料里的配套练习本，按目录跳转阅读。")}
         ${entryCard("gains", "gains", "收获本", "记录每次释放后的好处、成功、变化和觉察。")}
-        ${entryCard("goals", "goals", "目标与行动", "目标表格和行动清单相互关联，释放行动阻力。")}
       </section>
     </main>
   `);
@@ -1246,6 +1250,56 @@ function topicsView() {
           `;
         }).join("")}
       </div>
+    </main>
+  `);
+}
+
+function pdfPageFromRange(page = "") {
+  const match = String(page).match(/\d+/);
+  return match ? Number(match[0]) : 1;
+}
+
+function materialTocItems() {
+  return [
+    { title: "封面", page: 1, meta: "开始阅读" },
+    ...TOPICS.map((topic) => ({
+      title: topic.title,
+      page: pdfPageFromRange(topic.page),
+      meta: `P.${topic.page} · ${topic.workbookType}`
+    }))
+  ];
+}
+
+function materialPdfSrc(page = state.pdfPage || 1) {
+  return `./${encodeURIComponent(MATERIALS_PDF_FILE)}#page=${page}`;
+}
+
+function materialsView() {
+  const page = state.pdfPage || 1;
+  const items = materialTocItems();
+  return appFrame(`
+    <main class="screen materials-screen">
+      <div class="title-row">
+        <div>
+          <span class="eyebrow">Workbook PDF</span>
+          <h1 class="screen-title">释放资料</h1>
+        </div>
+        <a class="soft-btn material-open-link" href="${materialPdfSrc(page)}" target="_blank" rel="noopener">打开 PDF</a>
+      </div>
+      <section class="materials-reader">
+        <aside class="materials-toc" aria-label="释放资料目录">
+          <h2>目录</h2>
+          <div class="materials-toc-list">
+            ${items.map((item) => `
+              <button class="${item.page === page ? "active" : ""}" type="button" data-action="open-material-page" data-page="${item.page}">
+                <strong>${escapeHtml(item.title)}</strong>
+                <span>${escapeHtml(item.meta)}</span>
+              </button>
+            `).join("")}
+          </div>
+        </aside>
+        <iframe class="pdf-reader" title="92年资料-释放法配套练习本" src="${materialPdfSrc(page)}"></iframe>
+      </section>
     </main>
   `);
 }
@@ -2221,6 +2275,7 @@ function renderDialog() {
 function render() {
   const views = {
     home: homeView,
+    materials: materialsView,
     topics: topicsView,
     topicDetail: topicDetailView,
     releaseStart: releaseStartView,
@@ -2500,6 +2555,10 @@ app.addEventListener("click", async (event) => {
       sectionKey: structure.sections[0]?.key || "default"
     };
     setRoute("releaseSetup");
+  }
+  if (name === "open-material-page") {
+    state.pdfPage = Number(action.dataset.page || 1);
+    render();
   }
   if (name === "select-emotion") {
     if (ignoreNextEmotionClick && action.classList.contains("emotion-card-main")) {
