@@ -485,7 +485,7 @@ function makeCardRow(topic, namePrefix, card = null) {
   return `
     <div class="release-table-row" data-card-row>
       <input type="hidden" name="${namePrefix}CardId" value="${escapeHtml(id)}" />
-      <input name="${namePrefix}CardText" value="${escapeHtml(card?.text || "")}" placeholder="${fieldName(topic)}" />
+      <input name="${namePrefix}CardText" value="${escapeHtml(card?.text || "")}" aria-label="${fieldName(topic)}" placeholder="${feelingPlaceholder(topic)}" />
       <label class="mini-check"><input type="checkbox" name="${namePrefix}CardReleased" value="${escapeHtml(id || "new")}" ${card?.released ? "checked" : ""} /><span>✓</span><b>释放了吗</b></label>
       <button class="text-delete-btn card-delete-btn" type="button" data-action="remove-structured-card-row" aria-label="删除这一条${fieldName(topic)}">删除</button>
     </div>
@@ -1064,7 +1064,7 @@ function groupedSectionFields(topic, structure, section) {
       ${(section.groups || []).map((group, index) => structuredGroupFields(topic, section, group, definition, index)).join("")}
       ${!(section.groups || []).length ? structuredGroupFields(topic, section, makeGroup("", [makeCard(topic)]), definition, 0) : ""}
     </div>
-    <button class="soft-btn" type="button" data-action="add-structured-group">${addGroupButtonLabel(structure, section)}</button>
+    <button class="soft-btn group-add-btn" type="button" data-action="add-structured-group">${addGroupButtonLabel(structure, section)}</button>
   `;
 }
 
@@ -1109,7 +1109,7 @@ function structuredGroupFields(topic, section, group, definition, index = 0) {
         <h4>${escapeHtml(groupTitle(section, index))}</h4>
         <button class="text-delete-btn group-delete-btn" type="button" data-action="remove-structured-group" aria-label="删除${escapeHtml(groupTitle(section, index))}">删除</button>
       </header>
-      <div class="field compact-field">
+      <div class="field compact-field group-text-field">
         <textarea name="${prefix}Text" aria-label="${escapeHtml(definition?.groupPrompt || groupTitle(section, index))}" placeholder="${escapeHtml(groupPlaceholder(section))}">${escapeHtml(group.text || "")}</textarea>
       </div>
       ${directCardsFields(topic, prefix, group.cards || [])}
@@ -1129,7 +1129,7 @@ function directCardsFields(topic, prefix, cards) {
       </div>
       ${rows.map((card) => makeCardRow(topic, prefix, card)).join("")}
     </div>
-    <button class="soft-btn" type="button" data-action="add-structured-card-row">添加${fieldName(topic)}</button>
+    <button class="soft-btn add-card-btn" type="button" data-action="add-structured-card-row">添加${fieldName(topic)}</button>
   `;
 }
 

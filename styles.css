@@ -1074,13 +1074,16 @@ select:focus {
 .structured-groups,
 .structured-group {
   display: grid;
-  gap: var(--space-md);
+}
+
+.structured-editor {
+  gap: var(--space-lg);
 }
 
 .structured-tab-panels,
 .structured-sections {
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-lg);
 }
 
 .structured-tab-panel[hidden] {
@@ -1089,52 +1092,64 @@ select:focus {
 
 .structured-tabs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: var(--space-xs);
-  padding: 4px;
-  background: color-mix(in oklch, var(--paper-deep) 42%, var(--surface));
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 3px;
+  padding: 3px;
+  background: color-mix(in oklch, var(--paper-deep) 34%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--line) 78%, transparent);
+  border-radius: calc(var(--radius) + 6px);
 }
 
 .structured-tab {
-  min-height: 44px;
-  padding: var(--space-xs) var(--space-sm);
-  color: var(--muted);
+  min-height: 46px;
+  padding: var(--space-sm) var(--space-md);
+  color: color-mix(in oklch, var(--muted) 88%, var(--ink));
   background: transparent;
   border: 0;
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: calc(var(--radius) + 2px);
   font-weight: 900;
 }
 
 .structured-tab.active {
   color: var(--teal-dark);
-  background: color-mix(in oklch, var(--gold) 34%, var(--surface));
-  box-shadow: 0 1px 0 color-mix(in oklch, var(--gold) 48%, transparent);
+  background: color-mix(in oklch, var(--surface) 88%, var(--gold));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--gold) 42%, var(--line)),
+    0 7px 16px oklch(38% 0.04 85 / 0.08);
 }
 
 .structured-section {
-  padding: var(--space-md);
-  background: color-mix(in oklch, var(--paper-deep) 30%, var(--surface));
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: color-mix(in oklch, var(--surface) 90%, var(--paper));
+  border: 1px solid color-mix(in oklch, var(--line) 82%, var(--surface));
+  border-radius: calc(var(--radius) + 8px);
 }
 
 .structured-section-head {
   display: grid;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .structured-section-head h3 {
   margin: 0;
-  font-size: 1rem;
+  color: var(--teal-dark);
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.structured-groups {
+  gap: var(--space-lg);
 }
 
 .structured-group {
+  gap: var(--space-md);
   padding: var(--space-lg);
-  background: color-mix(in oklch, var(--surface) 95%, var(--paper-deep));
-  border: 1px solid color-mix(in oklch, var(--gold) 28%, var(--line));
-  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--surface) 97%, var(--gold)), color-mix(in oklch, var(--surface) 94%, var(--paper-deep)));
+  border: 1px solid color-mix(in oklch, var(--gold) 30%, var(--line));
+  border-radius: calc(var(--radius) + 6px);
+  box-shadow: 0 10px 26px oklch(34% 0.035 90 / 0.06);
 }
 
 .structured-group-head {
@@ -1147,8 +1162,9 @@ select:focus {
 .structured-group-head h4 {
   margin: 0;
   color: var(--teal-dark);
-  font-size: 0.98rem;
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  line-height: 1.15;
 }
 
 .structured-group-actions {
@@ -1158,29 +1174,35 @@ select:focus {
   align-items: center;
 }
 
-.release-table-head,
+.group-text-field textarea {
+  min-height: 86px;
+  background: color-mix(in oklch, var(--surface) 96%, var(--paper));
+}
+
+.release-table-head {
+  display: none;
+}
+
 .release-table-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   gap: var(--space-sm);
   align-items: center;
-}
-
-.release-table-head {
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 800;
+  padding: var(--space-sm);
+  background: color-mix(in oklch, var(--surface) 97%, var(--paper));
+  border: 1px solid color-mix(in oklch, var(--line) 78%, transparent);
+  border-radius: calc(var(--radius) + 4px);
 }
 
 .release-table-row input[name$="CardText"] {
   min-width: 0;
+  background: transparent;
+  border-color: transparent;
 }
 
-.release-table-row {
-  padding: var(--space-sm);
-  background: color-mix(in oklch, var(--paper) 42%, var(--surface));
-  border: 1px solid color-mix(in oklch, var(--line) 70%, transparent);
-  border-radius: calc(var(--radius) - 4px);
+.release-table-row input[name$="CardText"]:focus {
+  background: var(--surface);
+  border-color: var(--teal);
 }
 
 .mini-check {
@@ -1220,28 +1242,14 @@ select:focus {
   border-color: var(--teal);
 }
 
-.row-delete-btn {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  min-height: 36px;
-  padding: 0;
-  color: oklch(38% 0.11 25);
-  background: color-mix(in oklch, var(--rose) 18%, var(--surface));
-  border: 1px solid color-mix(in oklch, var(--rose) 34%, var(--line));
-  border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 900;
-}
-
 .text-delete-btn {
   min-height: 36px;
   padding: 0 var(--space-xs);
-  color: color-mix(in oklch, var(--muted) 82%, oklch(42% 0.1 25));
+  color: color-mix(in oklch, var(--muted) 88%, var(--surface));
   background: transparent;
   border: 0;
-  font-size: 0.82rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .text-delete-btn:hover,
@@ -1252,6 +1260,38 @@ select:focus {
 
 .group-delete-btn {
   justify-self: end;
+  color: color-mix(in oklch, var(--muted) 82%, var(--ink));
+}
+
+.add-card-btn,
+.group-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-card-btn {
+  min-height: 38px;
+  padding: var(--space-sm) var(--space-xs);
+  color: color-mix(in oklch, var(--teal-dark) 82%, var(--muted));
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.92rem;
+}
+
+.add-card-btn::before,
+.group-add-btn::before {
+  content: "+";
+  margin-right: var(--space-xs);
+  font-weight: 900;
+}
+
+.group-add-btn {
+  margin-top: var(--space-xs);
+  color: var(--teal-dark);
+  background: color-mix(in oklch, var(--gold) 20%, var(--surface));
+  border: 1px dashed color-mix(in oklch, var(--gold) 58%, var(--line));
+  box-shadow: none;
 }
 
 .release-item-list {
@@ -1396,6 +1436,17 @@ select:focus {
 }
 
 @media (max-width: 520px) {
+  .form-card,
+  .panel,
+  .record-detail-card {
+    gap: var(--space-lg);
+  }
+
+  .form-card {
+    padding: var(--space-lg);
+    border-radius: calc(var(--radius) + 8px);
+  }
+
   .emotion-card-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1498,15 +1549,37 @@ select:focus {
     position: sticky;
     top: 0;
     z-index: 2;
+    margin-inline: calc(var(--space-xs) * -1);
+    background: color-mix(in oklch, var(--paper) 82%, var(--surface));
+    box-shadow: 0 10px 18px oklch(42% 0.035 85 / 0.06);
   }
 
-  .structured-section,
-  .structured-group {
+  .structured-section {
     padding: var(--space-md);
+    border-radius: calc(var(--radius) + 8px);
+  }
+
+  .structured-section-head h3 {
+    font-size: 1rem;
+  }
+
+  .structured-group {
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: calc(var(--radius) + 8px);
   }
 
   .structured-group-head {
     align-items: flex-start;
+  }
+
+  .structured-group-head h4 {
+    font-size: 1.05rem;
+  }
+
+  .group-text-field textarea {
+    min-height: 88px;
+    padding: var(--space-lg);
   }
 
   .release-table-head {
@@ -1519,14 +1592,16 @@ select:focus {
       "text text"
       "check delete";
     gap: var(--space-sm);
-    padding: var(--space-sm);
-    background: color-mix(in oklch, var(--paper) 50%, var(--surface));
-    border: 1px solid color-mix(in oklch, var(--line) 68%, transparent);
-    border-radius: calc(var(--radius) - 4px);
+    padding: var(--space-xs) var(--space-sm) var(--space-sm);
+    background: color-mix(in oklch, var(--surface) 98%, var(--paper));
+    border: 1px solid color-mix(in oklch, var(--line) 72%, transparent);
+    border-radius: calc(var(--radius) + 4px);
   }
 
   .release-table-row input[name$="CardText"] {
     grid-area: text;
+    min-height: 48px;
+    padding: var(--space-md) var(--space-xs);
   }
 
   .release-table-row .mini-check {
@@ -1535,7 +1610,7 @@ select:focus {
     justify-content: start;
     gap: var(--space-sm);
     min-height: 44px;
-    padding: 0 var(--space-sm) 0 0;
+    padding: 0 var(--space-sm) 0 var(--space-xs);
     color: var(--muted);
     font-weight: 800;
   }
@@ -1555,7 +1630,25 @@ select:focus {
     justify-self: end;
     align-self: center;
     min-height: 44px;
-    color: color-mix(in oklch, var(--muted) 86%, oklch(42% 0.1 25));
+    padding-inline: var(--space-sm);
+    color: color-mix(in oklch, var(--muted) 92%, var(--surface));
+    font-weight: 700;
+  }
+
+  .record-good-toggle {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: calc(var(--radius) + 4px);
+  }
+
+  .add-card-btn {
+    justify-self: start;
+    padding-inline: var(--space-xs);
+  }
+
+  .group-add-btn {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 0;
   }
 
   .structured-group-actions {
