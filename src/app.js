@@ -225,6 +225,13 @@ const state = {
   topicId: null,
   selectedTopicRecordId: null,
   topicRecordMode: "list",
+  topicRecordView: "list",
+  editingRecordId: null,
+  editingDraftRecord: null,
+  editingSectionKey: "",
+  editingGroupId: "",
+  expandedCardId: "",
+  focusCardId: "",
   releaseSetup: null,
   sessionId: null,
   release: null,
@@ -460,6 +467,135 @@ function summarizeStructuredRecord(record) {
     const suffix = section.feelsGood ? "感觉好了" : "还不好";
     return `${section.title}：${(section.cards || []).length} 个${fieldName(topic)} · ${suffix}`;
   });
+}
+
+function cloneRecord(record) {
+  return JSON.parse(JSON.stringify(record));
+}
+
+function currentTopicStructure() {
+  const topic = getTopic(state.topicId) || TOPICS[0];
+  return topicStructure(topic);
+}
+
+function draftRecord() {
+  return state.editingDraftRecord;
+}
+
+function sectionLabel(structure, section) {
+  return sectionTabLabel(structure, section);
+}
+
+function groupUnitLabel(structure, section) {
+  if (structure.type === "likes-dislikes") return "方面";
+  if (structure.type === "stuckness") return section.key === "benefits" ? "好处" : "坏处";
+  if (structure.type === "goal" && section.key === "goal-actions") return "行动";
+  return "条目";
+}
+
+function addGroupLabelForSection(structure, section) {
+  const unit = groupUnitLabel(structure, section);
+  return `添加一个${unit}`;
+}
+
+function sectionStats(section) {
+  const groups = section.groups || [];
+  const cards = groups.length ? groups.flatMap((group) => group.cards || []) : (section.cards || []);
+  const released = cards.filter((card) => card.released).length;
+  const feelsGood = groups.length
+    ? groups.length > 0 && groups.every((group) => group.feelsGood)
+    : Boolean(section.feelsGood);
+  return {
+    groupCount: groups.length,
+    cardCount: cards.length,
+    released,
+    feelsGood
+  };
+}
+
+function recordSummary(topic, record, sectionKey = "") {
+  const structure = topicStructure(topic);
+  const sections = record.sections || [];
+  const section = sections.find((item) => item.key === sectionKey) || sections.find((item) => {
+    const stats = sectionStats(item);
+    return stats.groupCount || stats.cardCount;
+  }) || sections[0];
+  const stats = section ? sectionStats(section) : { groupCount: 0, cardCount: 0, released: 0, feelsGood: false };
+  const hasGroups = section && sectionCanHaveGroups(structure, section.key);
+  const unit = section ? groupUnitLabel(structure, section) : "条目";
+  const label = section ? sectionLabel(structure, section) : "";
+  return {
+    label,
+    unit,
+    stats,
+    primary: hasGroups
+      ? `${label} ${stats.groupCount} 个${unit} · ${stats.cardCount} 个${fieldName(topic)}`
+      : `${label} ${stats.cardCount} 个${fieldName(topic)}`,
+    secondary: `${stats.released}/${stats.cardCount} 已释放 · ${stats.feelsGood ? "感觉好了" : "感觉还不好"}`
+  };
+}
+
+function groupSummary(topic, section, group) {
+  const cards = group.cards || [];
+  const released = cards.filter((card) => card.released).length;
+  const preview = cards.map((card) => card.text).filter(Boolean).slice(0, 3).join(" · ") || `还没有${fieldName(topic)}`;
+  return {
+    preview,
+    released,
+    total: cards.length,
+    feelsGood: Boolean(group.feelsGood)
+  };
+}
+
+function iconSvg(name) {
+  const icons = {
+    home: `<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/>`,
+    topics: `<path d="M7 4h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"/><path d="M10 8h4"/><path d="M10 12h4"/>`,
+    release: `<path d="M12 21c-4.2-2.2-7-5.6-7-9.7V5.8L12 3l7 2.8v5.5c0 4.1-2.8 7.5-7 9.7Z"/><path d="M9 12.4c2.6-.1 4.4-1.2 5.5-3.4.7 3.5-.8 6-4.5 7.4"/><path d="M10 16.4c.8-2.1 2.1-3.7 4-4.7"/>`,
+    gains: `<path d="M12 21v-7"/><path d="M7 9c3.2 0 5 1.8 5 5-3.2 0-5-1.8-5-5Z"/><path d="M17 7c-3.2 0-5 2-5 5 3.2 0 5-2 5-5Z"/><path d="M5 21h14"/>`,
+    goals: `<path d="M12 21v-6"/><path d="M6 12c3.6 0 6 1.8 6 5-3.6 0-6-1.8-6-5Z"/><path d="M18 8c-3.6 0-6 2-6 5 3.6 0 6-2 6-5Z"/><path d="M12 4v4"/>`,
+    leaf: `<path d="M11 20A7 7 0 0 1 4 13C4 6 12 3 20 4c1 8-2 16-9 16Z"/><path d="M4 20c4-4 8-6 14-8"/>`,
+    sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/>`,
+    chat: `<path d="M21 12a8 8 0 0 1-8 8H7l-4 2 1.5-4A8 8 0 1 1 21 12Z"/>`,
+    mountain: `<path d="m3 19 6-10 4 6 2-3 6 7H3Z"/><path d="M9 9l2 3"/>`,
+    target: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3"/><path d="M22 12h-3"/>`,
+    cloud: `<path d="M20 16.2A4.5 4.5 0 0 0 17 8h-1.3A7 7 0 1 0 4 14.9"/><path d="M7 17h11"/>`,
+    want: `<path d="M12 22s7-4.4 7-11A7 7 0 0 0 5 11c0 6.6 7 11 7 11Z"/><path d="M12 8v5"/><path d="M12 16h.01"/>`
+  };
+  return `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[name] || icons.leaf}</svg>`;
+}
+
+function topicIconName(topic) {
+  const map = {
+    "likes-dislikes": "leaf",
+    success: "sun",
+    stuckness: "cloud",
+    goal: "target",
+    happiness: "sun",
+    "free-release": "release"
+  };
+  if (map[topic.id]) return map[topic.id];
+  if (topic.type === "want") return "want";
+  if (topic.columns?.length) return "chat";
+  return "leaf";
+}
+
+function iconBubble(iconName, extraClass = "") {
+  return `<span class="icon-bubble ${extraClass}">${iconSvg(iconName)}</span>`;
+}
+
+function emotionMetaForText(text = "") {
+  const normalized = text.trim();
+  if (!normalized) return null;
+  const index = EMOTION_GROUPS.findIndex((group) => group.name === normalized || group.children.includes(normalized));
+  if (index < 0) return null;
+  return { group: EMOTION_GROUPS[index], index };
+}
+
+function cardEmotionIcon(card) {
+  const meta = emotionMetaForText(card.text);
+  if (!meta) return iconBubble("leaf", "emotion-list-icon muted");
+  return `<span class="icon-bubble emotion-list-icon emotion-card-${meta.index}"><span class="emotion-icon">${emotionIcon(meta.group, meta.index)}</span></span>`;
 }
 
 function sectionByFormName(record, name) {
@@ -868,7 +1004,7 @@ function appFrame(content) {
         <strong>释放法练习本</strong>
         <span>本地记录 · 按练习本顺序</span>
       </div>
-      <button class="icon-btn" data-route="home" aria-label="首页">⌂</button>
+      <button class="icon-btn" data-route="home" aria-label="首页">${iconSvg("home")}</button>
     </header>
     ${content}
     ${bottomNav()}
@@ -879,10 +1015,10 @@ function appFrame(content) {
 
 function bottomNav() {
   const items = [
-    ["home", "⌂", "首页"],
-    ["topics", "目", "主题"],
-    ["releaseStart", "放", "释放"],
-    ["gains", "获", "收获"]
+    ["home", "home", "首页"],
+    ["topics", "topics", "主题"],
+    ["releaseStart", "release", "释放"],
+    ["gains", "gains", "收获"]
   ];
   return `
     <nav class="bottom-nav" aria-label="主要导航">
@@ -891,7 +1027,7 @@ function bottomNav() {
           .map(
             ([route, icon, label]) => `
               <button class="nav-item ${state.route === route ? "active" : ""}" data-route="${route}">
-                <span class="nav-icon">${icon}</span>
+                <span class="nav-icon">${iconSvg(icon)}</span>
                 <span>${label}</span>
               </button>`
           )
@@ -916,21 +1052,21 @@ function homeView() {
         <div class="stat"><b>${completed}</b><span>完成释放</span></div>
         <div class="stat"><b>${state.data.gains.length}</b><span>收获</span></div>
       </section>
-      ${open ? `<button class="entry-card" data-action="resume-latest"><span class="mark">续</span><strong>继续未完成释放</strong><span>还有 ${open} 次释放保存为进行中。</span></button>` : ""}
+      ${open ? `<button class="entry-card" data-action="resume-latest">${iconBubble("release", "mark")}<strong>继续未完成释放</strong><span>还有 ${open} 次释放保存为进行中。</span></button>` : ""}
       <section class="entry-grid">
-        ${entryCard("topics", "目", "主题释放数据库", "按原书目录进入主题，查看资料提醒，并以表格形式填写。")}
-        ${entryCard("releaseStart", "放", "开始释放", "主题释放或自由释放，系统按情绪/想要切换引导问题。")}
-        ${entryCard("gains", "获", "收获本", "记录每次释放后的好处、成功、变化和觉察。")}
-        ${entryCard("goals", "标", "目标与行动", "目标表格和行动清单相互关联，释放行动阻力。")}
+        ${entryCard("topics", "topics", "主题释放数据库", "按原书目录进入主题，查看资料提醒，并以卡片方式填写。")}
+        ${entryCard("releaseStart", "release", "开始释放", "主题释放或自由释放，系统按情绪/想要切换引导问题。")}
+        ${entryCard("gains", "gains", "收获本", "记录每次释放后的好处、成功、变化和觉察。")}
+        ${entryCard("goals", "goals", "目标与行动", "目标表格和行动清单相互关联，释放行动阻力。")}
       </section>
     </main>
   `);
 }
 
-function entryCard(route, mark, title, description) {
+function entryCard(route, iconName, title, description) {
   return `
     <button class="entry-card" data-route="${route}">
-      <span class="mark">${mark}</span>
+      ${iconBubble(iconName, "mark")}
       <strong>${title}</strong>
       <span>${description}</span>
     </button>
@@ -954,7 +1090,7 @@ function topicsView() {
           return `
             <button class="list-card" data-topic="${topic.id}">
               <header>
-                <h3>${topic.title}</h3>
+                <span class="list-card-title">${iconBubble(topicIconName(topic), "list-card-icon")}<h3>${topic.title}</h3></span>
                 <span class="pill">P.${topic.page}</span>
               </header>
               <div class="pill-row">
@@ -974,32 +1110,265 @@ function topicsView() {
 function topicDetailView() {
   const topic = getTopic(state.topicId) || TOPICS[0];
   const records = activeTopicRecords(topic.id);
-  const selected = records.find((record) => record.id === state.selectedTopicRecordId) || records[0];
-  const isFreeTopic = topic.id === FREE_RELEASE_TOPIC.id;
+  if (state.topicRecordView === "record" && draftRecord()) return topicRecordEditPage(topic, draftRecord());
+  if (state.topicRecordView === "group" && draftRecord()) return topicGroupEditPage(topic, draftRecord());
+  state.topicRecordView = "list";
   return appFrame(`
-    <main class="screen">
-      <div>
+    <main class="screen topic-record-list-screen">
+      <section class="topic-record-hero">
+        <div class="topic-record-hero-mark">${iconBubble(topicIconName(topic), "topic-hero-icon")}</div>
         <span class="eyebrow">练习本 P.${topic.page}</span>
         <h1 class="screen-title">${topic.title}</h1>
-      </div>
-      <section class="panel">
-        <div class="pill-row">
-          <span class="pill">${topic.workbookType}</span>
-          <span class="pill">${modeLabel(topic.type)}</span>
-          ${topic.columns ? topic.columns.map((item) => `<span class="pill">${item}</span>`).join("") : ""}
-        </div>
         <p>${topic.guidance}</p>
       </section>
-      ${isFreeTopic ? "" : topicForm(topic)}
-      <section>
-        <div class="section-heading-row">
+      <section class="record-list-section">
+        <div class="section-heading-row record-list-heading">
           <h2 class="section-title">释放记录</h2>
-          ${isFreeTopic ? "" : `<button class="icon-btn add-record-btn" data-action="create-empty-topic-record" data-topic="${topic.id}" aria-label="新增释放记录">＋</button>`}
+          <button class="primary-btn compact-primary" type="button" data-action="new-topic-record" data-topic="${topic.id}">${iconSvg("release")} 新建记录</button>
         </div>
-        ${records.length ? topicRecordsBrowser(topic, records, selected) : `<div class="empty">${isFreeTopic ? "还没有自由释放记录。可以从“开始释放”里创建。" : "还没有记录。先写下一项，再逐个勾选释放结果。"}</div>`}
+        ${records.length ? `
+          <div class="record-card-list">
+            ${records.map((record) => topicRecordSummaryCard(topic, record)).join("")}
+          </div>
+        ` : `<div class="empty calm-empty">还没有记录。新建一条记录，从一个主题开始。</div>`}
       </section>
     </main>
   `);
+}
+
+function topicRecordSummaryCard(topic, record) {
+  const summary = recordSummary(topic, record);
+  const good = recordIsGood(record);
+  return `
+    <button class="release-record-card" type="button" data-action="edit-topic-record-card" data-record="${record.id}">
+      ${iconBubble(topicIconName(topic), "release-record-icon")}
+      <span class="release-record-main">
+        <strong>${escapeHtml(record.subject || "未命名释放")}</strong>
+        <small>${formatDate(record.createdAt)}</small>
+        <span class="record-chip-row">
+          <span class="summary-chip">${escapeHtml(summary.primary)}</span>
+          <span class="summary-chip">${summary.stats.released}/${summary.stats.cardCount} 已释放</span>
+          <span class="summary-chip good-chip ${good ? "is-good" : "not-good"}">${good ? "感觉好了" : "还没感觉好"}</span>
+        </span>
+      </span>
+    </button>
+  `;
+}
+
+function topicRecordEditPage(topic, record) {
+  if (!isV2Record(record)) return appFrame(`<main class="screen"><div class="empty">这是一条旧结构记录，当前版本不再编辑旧记录。</div></main>`);
+  const structure = topicStructure(topic);
+  const section = findSection(record, state.editingSectionKey) || record.sections[0];
+  if (!state.editingSectionKey && section) state.editingSectionKey = section.key;
+  return appFrame(`
+    <main class="screen record-edit-screen">
+      <div class="edit-kicker">${iconBubble(topicIconName(topic), "tiny-leaf")}<span>${topic.title}</span></div>
+      <h1 class="screen-title">记录编辑</h1>
+      <form class="progressive-form" data-form="topic-record-card" data-record="${escapeHtml(record.id)}">
+        <section class="quiet-card subject-card">
+          <label class="field-label">主题</label>
+          <input name="subject" data-draft-field="subject" value="${escapeHtml(record.subject || "")}" placeholder="写下这一项" required />
+          ${record.sections.length > 1 ? recordSectionSegmented(structure, record, section) : ""}
+        </section>
+        ${section ? recordSectionEditor(topic, structure, record, section) : ""}
+        <section class="progressive-section">
+          <div class="section-line-title">${iconBubble("leaf", "tiny-leaf")}<h2>收获</h2></div>
+          <textarea name="gain" data-draft-field="gain" placeholder="这次练习后的收获、变化或觉察">${escapeHtml(record.gain || "")}</textarea>
+        </section>
+        <button class="primary-btn save-record-btn" type="submit">${iconSvg("topics")} 保存记录</button>
+      </form>
+    </main>
+  `);
+}
+
+function recordSectionSegmented(structure, record, activeSection) {
+  return `
+    <div class="record-section-switch" role="tablist" aria-label="记录分区">
+      <span class="switch-label">我正在看它的</span>
+      <span class="segmented-control">
+        ${record.sections.map((section) => `
+          <button class="${section.key === activeSection.key ? "active" : ""}" type="button" data-action="switch-record-section" data-section-key="${escapeHtml(section.key)}">${escapeHtml(sectionLabel(structure, section))}</button>
+        `).join("")}
+      </span>
+    </div>
+  `;
+}
+
+function recordSectionEditor(topic, structure, record, section) {
+  const grouped = sectionCanHaveGroups(structure, section.key);
+  if (grouped) {
+    return `
+      <section class="progressive-section">
+        <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionLabel(structure, section))}</h2></div>
+        <button class="dashed-add-btn" type="button" data-action="add-progressive-group" data-section-key="${escapeHtml(section.key)}">＋ ${escapeHtml(addGroupLabelForSection(structure, section))}</button>
+        <div class="group-card-list">
+          ${(section.groups || []).map((group) => groupSummaryCard(topic, structure, section, group)).join("")}
+        </div>
+      </section>
+    `;
+  }
+  return `
+    <section class="progressive-section">
+      <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionLabel(structure, section))}</h2></div>
+      ${directCardListEditor(topic, section, section)}
+      ${feelsGoodSegment("section", section.feelsGood, "感觉好吗？")}
+    </section>
+  `;
+}
+
+function groupSummaryCard(topic, structure, section, group) {
+  const summary = groupSummary(topic, section, group);
+  return `
+    <button class="group-summary-card" type="button" data-action="edit-progressive-group" data-section-key="${escapeHtml(section.key)}" data-group="${escapeHtml(group.id)}">
+      ${iconBubble(topicIconName(topic), "group-summary-icon")}
+      <span class="group-summary-main">
+        <strong>${escapeHtml(group.text || `未命名${groupUnitLabel(structure, section)}`)}</strong>
+        <small>${escapeHtml(summary.preview)}</small>
+        <span class="record-chip-row">
+          <span class="summary-chip">${summary.released}/${summary.total} 已释放</span>
+          <span class="summary-chip good-chip ${summary.feelsGood ? "is-good" : "not-good"}">${summary.feelsGood ? "感觉好了" : "还没感觉好"}</span>
+        </span>
+      </span>
+      <span class="chevron">›</span>
+    </button>
+  `;
+}
+
+function topicGroupEditPage(topic, record) {
+  const structure = topicStructure(topic);
+  const section = findSection(record, state.editingSectionKey) || record.sections[0];
+  const group = section ? findGroup(section, state.editingGroupId) : null;
+  if (!section || !group) {
+    state.topicRecordView = "record";
+    return topicRecordEditPage(topic, record);
+  }
+  return appFrame(`
+    <main class="screen group-edit-screen">
+      <h1 class="screen-title">方面详情</h1>
+      <p class="context-line">${escapeHtml(topic.title)} · ${escapeHtml(record.subject || "未命名释放")}</p>
+      <form class="progressive-form" data-form="topic-group-card">
+        <section class="progressive-section">
+          <label class="field-label">${escapeHtml(groupUnitLabel(structure, section))}内容</label>
+          <input name="groupText" data-draft-group-field="text" value="${escapeHtml(group.text || "")}" placeholder="${escapeHtml(groupPlaceholder(section))}" />
+        </section>
+        <section class="progressive-section">
+          <div class="section-line-title"><h2>${fieldName(topic)}列表</h2></div>
+          ${directCardListEditor(topic, group, group)}
+          <button class="dashed-add-btn" type="button" data-action="add-progressive-card" data-container="group">＋ 添加${fieldName(topic)}</button>
+        </section>
+        <section class="progressive-section">
+          <h2 class="feels-question">${escapeHtml(groupGoodLabel(section))}</h2>
+          ${feelsGoodSegment("group", group.feelsGood, groupGoodLabel(section))}
+        </section>
+        <button class="primary-btn save-record-btn" type="submit">保存${escapeHtml(groupUnitLabel(structure, section))}</button>
+      </form>
+    </main>
+  `);
+}
+
+function directCardListEditor(topic, container, owner) {
+  const cards = container.cards || [];
+  return `
+    <div class="progressive-card-list" data-card-container="${owner.id}">
+      ${cards.map((card) => feelingRow(topic, card)).join("")}
+    </div>
+    ${owner === container && !sectionCanHaveGroups(currentTopicStructure(), state.editingSectionKey) ? `<button class="dashed-add-btn" type="button" data-action="add-progressive-card" data-container="section">＋ 添加${fieldName(topic)}</button>` : ""}
+  `;
+}
+
+function feelingRow(topic, card) {
+  const expanded = state.expandedCardId === card.id;
+  return `
+    <div class="feeling-row ${expanded ? "expanded" : ""}" data-card="${escapeHtml(card.id)}">
+      ${cardEmotionIcon(card)}
+      <input data-draft-card-field="text" data-card="${escapeHtml(card.id)}" value="${escapeHtml(card.text || "")}" placeholder="${fieldName(topic)}" />
+      <button class="status-chip ${card.released ? "released" : ""}" type="button" data-action="toggle-progressive-card-release" data-card="${escapeHtml(card.id)}">${card.released ? "已释放" : "未释放"}</button>
+      <button class="chevron-btn" type="button" data-action="toggle-card-actions" data-card="${escapeHtml(card.id)}" aria-label="更多">›</button>
+      ${expanded ? `<button class="text-delete-btn card-inline-delete" type="button" data-action="delete-progressive-card" data-card="${escapeHtml(card.id)}">删除</button>` : ""}
+    </div>
+  `;
+}
+
+function feelsGoodSegment(scope, checked, label) {
+  return `
+    <div class="good-segment" role="group" aria-label="${escapeHtml(label)}">
+      <button class="${checked ? "" : "active"}" type="button" data-action="set-progressive-good" data-scope="${scope}" data-good="false">还没有</button>
+      <button class="${checked ? "active" : ""}" type="button" data-action="set-progressive-good" data-scope="${scope}" data-good="true">感觉好了</button>
+    </div>
+  `;
+}
+
+function resetTopicRecordEditing() {
+  state.topicRecordView = "list";
+  state.editingRecordId = null;
+  state.editingDraftRecord = null;
+  state.editingSectionKey = "";
+  state.editingGroupId = "";
+  state.expandedCardId = "";
+  state.focusCardId = "";
+}
+
+function beginTopicRecordDraft(topic, record = null) {
+  const draft = record ? cloneRecord(record) : makeStructuredRecord(topic);
+  state.editingRecordId = record?.id || null;
+  state.selectedTopicRecordId = record?.id || null;
+  state.editingDraftRecord = draft;
+  state.editingSectionKey = draft.sections[0]?.key || "";
+  state.editingGroupId = "";
+  state.expandedCardId = "";
+  state.focusCardId = "";
+  state.topicRecordView = "record";
+}
+
+function currentDraftSection() {
+  const record = draftRecord();
+  return record ? findSection(record, state.editingSectionKey) || record.sections[0] : null;
+}
+
+function currentDraftGroup() {
+  const section = currentDraftSection();
+  return section ? findGroup(section, state.editingGroupId) : null;
+}
+
+function currentCardContainer(scope = "") {
+  if (scope === "group") return currentDraftGroup();
+  if (scope === "section") return currentDraftSection();
+  return currentDraftGroup() || currentDraftSection();
+}
+
+function findDraftCard(cardId) {
+  const record = draftRecord();
+  if (!record) return { card: null, container: null };
+  for (const section of record.sections || []) {
+    for (const card of section.cards || []) {
+      if (card.id === cardId) return { card, container: section };
+    }
+    for (const group of section.groups || []) {
+      for (const card of group.cards || []) {
+        if (card.id === cardId) return { card, container: group };
+      }
+    }
+  }
+  return { card: null, container: null };
+}
+
+function normalizeRecordForSave(record) {
+  const normalized = cloneRecord(record);
+  normalized.sections = (normalized.sections || []).map((section) => {
+    section.cards = (section.cards || []).filter((card) => card.text?.trim());
+    section.groups = (section.groups || [])
+      .map((group) => ({
+        ...group,
+        text: group.text?.trim() || "",
+        cards: (group.cards || []).filter((card) => card.text?.trim())
+      }))
+      .filter((group) => group.text || group.cards.length);
+    return section;
+  });
+  normalized.subject = normalized.subject?.trim() || "";
+  normalized.gain = normalized.gain?.trim() || "";
+  normalized.updatedAt = nowIso();
+  return normalized;
 }
 
 function structuredFields(topic, record) {
@@ -1912,7 +2281,21 @@ async function pauseRelease() {
 
 function handleBack() {
   if (state.route === "home") return;
-  if (state.route === "topicDetail") return setRoute("topics");
+  if (state.route === "topicDetail") {
+    if (state.topicRecordView === "group") {
+      state.topicRecordView = "record";
+      state.editingGroupId = "";
+      state.expandedCardId = "";
+      render();
+      return;
+    }
+    if (state.topicRecordView === "record") {
+      resetTopicRecordEditing();
+      render();
+      return;
+    }
+    return setRoute("topics");
+  }
   if (state.route === "releaseSetup") return setRoute("releaseStart", { releaseSetup: null });
   if (state.route === "release") return pauseRelease();
   setRoute("home");
@@ -1920,13 +2303,19 @@ function handleBack() {
 
 app.addEventListener("click", async (event) => {
   const routeButton = event.target.closest("[data-route]");
-  if (routeButton) setRoute(routeButton.dataset.route);
+  if (routeButton) {
+    if (routeButton.dataset.route !== "topicDetail") resetTopicRecordEditing();
+    setRoute(routeButton.dataset.route);
+  }
 
   const backButton = event.target.closest("[data-action='back']");
   if (backButton) handleBack();
 
   const topicButton = event.target.closest("[data-topic]");
-  if (topicButton) setRoute("topicDetail", { topicId: topicButton.dataset.topic, topicRecordMode: "list" });
+  if (topicButton) {
+    resetTopicRecordEditing();
+    setRoute("topicDetail", { topicId: topicButton.dataset.topic, topicRecordMode: "list", topicRecordView: "list" });
+  }
 
   const action = event.target.closest("[data-action]");
   if (!action) return;
@@ -1981,6 +2370,98 @@ app.addEventListener("click", async (event) => {
   if (name === "export-gains") exportGains();
   if (name === "close-dialog") {
     state.dialog = null;
+    render();
+  }
+  if (name === "new-topic-record") {
+    const topic = getTopic(action.dataset.topic) || getTopic(state.topicId) || TOPICS[0];
+    beginTopicRecordDraft(topic);
+    render();
+    window.setTimeout(() => document.querySelector('[data-draft-field="subject"]')?.focus(), 80);
+  }
+  if (name === "edit-topic-record-card") {
+    const topic = getTopic(state.topicId) || TOPICS[0];
+    const record = state.data.topicRecords.find((item) => item.id === action.dataset.record);
+    if (isV2Record(record)) {
+      beginTopicRecordDraft(topic, record);
+      render();
+    }
+  }
+  if (name === "switch-record-section") {
+    state.editingSectionKey = action.dataset.sectionKey;
+    state.editingGroupId = "";
+    state.expandedCardId = "";
+    render();
+  }
+  if (name === "add-progressive-group") {
+    const record = draftRecord();
+    const section = record ? findSection(record, action.dataset.sectionKey) : null;
+    if (record && section) {
+      const group = makeGroup("", []);
+      section.groups.push(group);
+      section.updatedAt = nowIso();
+      state.editingSectionKey = section.key;
+      state.editingGroupId = group.id;
+      state.topicRecordView = "group";
+      render();
+      window.setTimeout(() => document.querySelector('[data-draft-group-field="text"]')?.focus(), 80);
+    }
+  }
+  if (name === "edit-progressive-group") {
+    state.editingSectionKey = action.dataset.sectionKey;
+    state.editingGroupId = action.dataset.group;
+    state.expandedCardId = "";
+    state.topicRecordView = "group";
+    render();
+  }
+  if (name === "add-progressive-card") {
+    const topic = getTopic(state.topicId) || TOPICS[0];
+    const container = currentCardContainer(action.dataset.container);
+    if (container) {
+      const card = makeCard(topic);
+      container.cards = container.cards || [];
+      container.cards.push(card);
+      container.updatedAt = nowIso();
+      state.focusCardId = card.id;
+      render();
+      window.setTimeout(() => document.querySelector(`[data-draft-card-field][data-card="${card.id}"]`)?.focus(), 80);
+    }
+  }
+  if (name === "toggle-progressive-card-release") {
+    const { card } = findDraftCard(action.dataset.card);
+    if (card) {
+      card.released = !card.released;
+      card.updatedAt = nowIso();
+      render();
+    }
+  }
+  if (name === "toggle-card-actions") {
+    state.expandedCardId = state.expandedCardId === action.dataset.card ? "" : action.dataset.card;
+    render();
+  }
+  if (name === "delete-progressive-card") {
+    const { card, container } = findDraftCard(action.dataset.card);
+    if (card && container) {
+      container.cards = (container.cards || []).filter((item) => item.id !== card.id);
+      container.updatedAt = nowIso();
+      state.expandedCardId = "";
+      render();
+    }
+  }
+  if (name === "set-progressive-good") {
+    const value = action.dataset.good === "true";
+    if (action.dataset.scope === "group") {
+      const group = currentDraftGroup();
+      if (group) {
+        group.feelsGood = value;
+        group.updatedAt = nowIso();
+      }
+    } else {
+      const section = currentDraftSection();
+      if (section) {
+        section.feelsGood = value;
+        section.updatedAt = nowIso();
+      }
+    }
     render();
   }
   if (name === "add-topic-form-row") {
@@ -2238,10 +2719,68 @@ app.addEventListener("click", (event) => {
   if (hidden) hidden.value = choice.dataset.value;
 });
 
+app.addEventListener("input", (event) => {
+  const target = event.target;
+  const record = draftRecord();
+  if (!record || state.route !== "topicDetail") return;
+  if (target.matches("[data-draft-field]")) {
+    record[target.dataset.draftField] = target.value;
+    record.updatedAt = nowIso();
+  }
+  if (target.matches("[data-draft-group-field]")) {
+    const group = currentDraftGroup();
+    if (group) {
+      group[target.dataset.draftGroupField] = target.value;
+      group.updatedAt = nowIso();
+      record.updatedAt = nowIso();
+    }
+  }
+  if (target.matches("[data-draft-card-field]")) {
+    const { card } = findDraftCard(target.dataset.card);
+    if (card) {
+      card[target.dataset.draftCardField] = target.value;
+      card.updatedAt = nowIso();
+      record.updatedAt = nowIso();
+    }
+  }
+});
+
 app.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target;
   const data = Object.fromEntries(new FormData(form).entries());
+
+  if (form.dataset.form === "topic-record-card") {
+    const record = draftRecord();
+    if (isV2Record(record)) {
+      record.subject = data.subject || record.subject || "";
+      record.gain = data.gain || record.gain || "";
+      const normalized = normalizeRecordForSave(record);
+      await putStore("topicRecords", normalized);
+      await loadData();
+      state.selectedTopicRecordId = normalized.id;
+      resetTopicRecordEditing();
+      render();
+      showToast("释放记录已保存");
+    }
+    return;
+  }
+
+  if (form.dataset.form === "topic-group-card") {
+    const group = currentDraftGroup();
+    if (group) {
+      group.text = data.groupText || group.text || "";
+      group.updatedAt = nowIso();
+      const record = draftRecord();
+      if (record) record.updatedAt = nowIso();
+    }
+    state.topicRecordView = "record";
+    state.editingGroupId = "";
+    state.expandedCardId = "";
+    render();
+    showToast("方面已保存");
+    return;
+  }
 
   if (form.dataset.form === "topic-record") {
     const topic = getTopic(data.topicId);
