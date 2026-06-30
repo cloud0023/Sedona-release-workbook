@@ -301,58 +301,59 @@ const ITEMIZED_TOPIC_STRUCTURES = {
   "suppress-express": {
     type: "itemized",
     groupLabel: "事情",
+    switchLabel: "释放的角度",
     sections: [
-      { key: "suppressed", title: "压抑", groupPrompt: "当时压抑情绪的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" },
-      { key: "expressed", title: "表达", groupPrompt: "当时表达情绪的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" }
+      { key: "suppressed", title: "压抑情绪", heading: "压抑情绪的具体事情", groupPrompt: "回忆一件压抑情绪的事", groupLabel: "事情", goodLabel: "这件事感觉好吗？" },
+      { key: "expressed", title: "表达情绪", heading: "表达情绪的具体事情", groupPrompt: "回忆一件表达情绪的事", groupLabel: "事情", goodLabel: "这件事感觉好吗？" }
     ]
   },
   "remember-approval-control": {
     type: "itemized",
     groupLabel: "事情",
     sections: [
-      { key: "approval", title: "想要被认同", groupPrompt: "想要被认同的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" },
-      { key: "control", title: "想要控制", groupPrompt: "想要控制的具体事情", groupLabel: "事情", goodLabel: "这件事感觉好吗？" }
+      { key: "approval", title: "想要认同", groupPrompt: "回想一件想要被认同的事", groupLabel: "事情", goodLabel: "这件事感觉好吗？" },
+      { key: "control", title: "想要控制", groupPrompt: "回想一件想要控制的事", groupLabel: "事情", goodLabel: "这件事感觉好吗？" }
     ]
   },
   "letting-go-wants": {
     type: "itemized",
     groupLabel: "内容",
     sections: [
-      { key: "wants", title: "想要", groupPrompt: "我想要什么？", groupLabel: "内容", goodLabel: "这个想要感觉好吗？" },
-      { key: "not-wants", title: "不想要", groupPrompt: "我不想要什么？", groupLabel: "内容", goodLabel: "这个不想要感觉好吗？" }
+      { key: "wants", title: "想要的东西", groupPrompt: "我想要什么东西", groupLabel: "内容", goodLabel: "这个想要感觉好吗？" },
+      { key: "not-wants", title: "不想要的东西", groupPrompt: "我不想要什么东西", groupLabel: "内容", goodLabel: "这个不想要感觉好吗？" }
     ]
   },
   "want-control": {
     type: "itemized",
     groupLabel: "答案",
     sections: [
-      { key: "control-gains", title: "想要控制", groupPrompt: "从想要控制中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" },
-      { key: "controlled-gains", title: "想要被控制", groupPrompt: "从想要被控制中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" }
+      { key: "control-gains", title: "想要控制", groupPrompt: "从想要控制中能得到什么", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" },
+      { key: "controlled-gains", title: "想要被控制", groupPrompt: "从想要被控制中能得到什么", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" }
     ]
   },
   "want-approval": {
     type: "itemized",
     groupLabel: "答案",
     sections: [
-      { key: "approval-gains", title: "想要被认同", groupPrompt: "从想要被认同中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" },
-      { key: "disapproval-gains", title: "想要不被认同", groupPrompt: "从想要不被认同中我能得到什么？", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" }
+      { key: "approval-gains", title: "想要认同", groupPrompt: "从想要认同中能得到什么", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" },
+      { key: "disapproval-gains", title: "不被认同", groupPrompt: "从不被认同中能得到什么", groupLabel: "答案", goodLabel: "这个答案感觉好吗？" }
     ]
   },
   "seeing-wants": {
     type: "itemized",
     groupLabel: "方式",
     sections: [
-      { key: "approval-seeking", title: "寻求被认同", groupPrompt: "我怎样寻求被认同？", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" },
-      { key: "security-seeking", title: "寻求安全", groupPrompt: "我怎样寻求安全？", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" },
-      { key: "control-seeking", title: "试图控制", groupPrompt: "我怎样试图控制？", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" }
+      { key: "approval-seeking", title: "寻求认同", groupPrompt: "我寻求被认同的方式", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" },
+      { key: "security-seeking", title: "寻求安全", groupPrompt: "我寻求安全的方式", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" },
+      { key: "control-seeking", title: "试图控制", groupPrompt: "我试图控制的方式", groupLabel: "方式", goodLabel: "这个方式感觉好吗？" }
     ]
   },
   happiness: {
     type: "itemized",
     groupLabel: "条件",
     sections: [
-      { key: "needs", title: "需要", groupPrompt: "我需要什么才能获得快乐？", groupLabel: "条件", goodLabel: "这个需要感觉好吗？" },
-      { key: "avoidance", title: "避免", groupPrompt: "我需要避免什么才能获得快乐？", groupLabel: "条件", goodLabel: "这个避免感觉好吗？" }
+      { key: "needs", title: "需要什么", groupPrompt: "我需要什么才能获得快乐", groupLabel: "条件", goodLabel: "这个需要感觉好吗？" },
+      { key: "avoidance", title: "避免什么", groupPrompt: "我需要避免什么才能获得快乐", groupLabel: "条件", goodLabel: "这个避免感觉好吗？" }
     ]
   }
 };
@@ -371,16 +372,16 @@ const TOPIC_STRUCTURES = {
     type: "likes-dislikes",
     groupLabel: "方面",
     sections: [
-      { key: "likes", title: "我喜欢的方面", groupPrompt: "方面内容" },
-      { key: "dislikes", title: "我不喜欢的方面", groupPrompt: "方面内容" }
+      { key: "likes", title: "喜欢的方面", groupPrompt: "我喜欢该主题的哪些方面" },
+      { key: "dislikes", title: "不喜欢的方面", groupPrompt: "我不喜欢该主题的哪些方面" }
     ]
   },
   stuckness: {
     type: "stuckness",
     groupLabel: "条目",
     sections: [
-      { key: "benefits", title: "对我有什么好处", groupPrompt: "好处内容" },
-      { key: "harms", title: "对我有什么坏处", groupPrompt: "坏处内容" }
+      { key: "benefits", title: "有什么好处", groupPrompt: "对我有什么好处" },
+      { key: "harms", title: "有什么坏处", groupPrompt: "对我有什么坏处" }
     ]
   },
   goal: {
@@ -388,7 +389,7 @@ const TOPIC_STRUCTURES = {
     groupLabel: "行动",
     sections: [
       { key: "goal-feelings", title: "我对此有什么感受" },
-      { key: "goal-actions", title: "为了达成目标要做的事", groupPrompt: "行动内容" }
+      { key: "goal-actions", title: "行动清单", groupPrompt: "为了达成目标要做的事" }
     ]
   }
 };
@@ -565,8 +566,26 @@ function topicUsesDefaultSubject(topic) {
   return Boolean(defaultTopicRecordSubject(topic));
 }
 
+function topicSubjectPrompt(topic) {
+  const prompts = {
+    "change-life": "列出想要改变的人事物",
+    success: "想变得更成功的一个领域",
+    "likes-dislikes": "主题",
+    "must-do": "我觉得我必须做的事",
+    goal: "我想要实现的目标",
+    "want-security": "回想一件想要安全/生存的事",
+    stuckness: "主题",
+    "free-release": "释放对象"
+  };
+  return prompts[topic?.id] || topic?.fields?.[0] || "主题";
+}
+
 function sectionLabel(structure, section) {
   return sectionTabLabel(structure, section);
+}
+
+function sectionHeadingLabel(structure, section) {
+  return section.heading || sectionLabel(structure, section);
 }
 
 function groupUnitLabel(structure, section) {
@@ -1278,7 +1297,7 @@ function topicRecordEditPage(topic, record) {
       <h1 class="screen-title">记录编辑</h1>
       <form class="progressive-form" data-form="topic-record-card" data-record="${escapeHtml(record.id)}">
         <section class="quiet-card subject-card">
-          <label class="field-label">主题</label>
+          <label class="field-label">${escapeHtml(topicSubjectPrompt(topic))}</label>
           ${fixedSubject
             ? `<input type="hidden" name="subject" value="${escapeHtml(record.subject || defaultTopicRecordSubject(topic))}" /><div class="fixed-subject">${escapeHtml(record.subject || defaultTopicRecordSubject(topic))}</div>`
             : `<input name="subject" data-draft-field="subject" value="${escapeHtml(record.subject || "")}" placeholder="写下这一项" required />`}
@@ -1298,7 +1317,7 @@ function topicRecordEditPage(topic, record) {
 function recordSectionSegmented(structure, record, activeSection) {
   return `
     <div class="record-section-switch" role="tablist" aria-label="记录分区">
-      <span class="switch-label">我正在看它的</span>
+      <span class="switch-label">${escapeHtml(structure.switchLabel || "我正在看它的")}</span>
       <span class="segmented-control">
         ${record.sections.map((section) => `
           <button class="${section.key === activeSection.key ? "active" : ""}" type="button" data-action="switch-record-section" data-section-key="${escapeHtml(section.key)}">${escapeHtml(sectionLabel(structure, section))}</button>
@@ -1313,7 +1332,7 @@ function recordSectionEditor(topic, structure, record, section) {
   if (grouped) {
     return `
       <section class="progressive-section">
-        <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionLabel(structure, section))}</h2></div>
+        <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionHeadingLabel(structure, section))}</h2></div>
         <button class="dashed-add-btn" type="button" data-action="add-progressive-group" data-section-key="${escapeHtml(section.key)}">＋ ${escapeHtml(addGroupLabelForSection(structure, section))}</button>
         <div class="group-card-list">
           ${(section.groups || []).map((group) => groupSummaryCard(topic, structure, section, group)).join("")}
@@ -1323,7 +1342,7 @@ function recordSectionEditor(topic, structure, record, section) {
   }
   return `
     <section class="progressive-section">
-      <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionLabel(structure, section))}</h2></div>
+      <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionHeadingLabel(structure, section))}</h2></div>
       ${directCardListEditor(topic, section, section)}
       ${feelsGoodSegment("section", section.feelsGood, "感觉好吗？")}
     </section>
@@ -1362,14 +1381,14 @@ function topicGroupEditPage(topic, record) {
   return appFrame(`
     <main class="screen group-edit-screen">
       <h1 class="screen-title">${escapeHtml(unit)}详情</h1>
-      <p class="context-line">${escapeHtml(topic.title)} · ${escapeHtml(record.subject || "未命名释放")}</p>
+      <p class="context-line">${escapeHtml(topic.title)} · ${escapeHtml(sectionLabel(structure, section))}</p>
       <form class="progressive-form" data-form="topic-group-card">
         <section class="progressive-section">
           <label class="field-label">${escapeHtml(section.groupPrompt || `${unit}内容`)}</label>
           <input name="groupText" data-draft-group-field="text" value="${escapeHtml(group.text || "")}" placeholder="${escapeHtml(groupPlaceholder(section))}" />
         </section>
         <section class="progressive-section">
-          <div class="section-line-title"><h2>${fieldName(topic)}列表</h2></div>
+          <div class="section-line-title"><h2>${escapeHtml(cardListQuestion(topic))}</h2></div>
           ${directCardListEditor(topic, group, group)}
           <button class="dashed-add-btn" type="button" data-action="add-progressive-card" data-container="group">＋ 添加${fieldName(topic)}</button>
         </section>
@@ -1513,14 +1532,14 @@ function structuredFields(topic, record) {
 
 function sectionTabLabel(structure, section) {
   const labels = {
-    success: "成功",
-    failure: "失败",
-    likes: "喜欢",
-    dislikes: "不喜欢",
-    benefits: "好处",
-    harms: "坏处",
+    success: "如果成功",
+    failure: "如果失败",
+    likes: "喜欢的方面",
+    dislikes: "不喜欢的方面",
+    benefits: "有什么好处",
+    harms: "有什么坏处",
     "goal-feelings": "目标感受",
-    "goal-actions": "行动"
+    "goal-actions": "行动清单"
   };
   return labels[section.key] || section.title || structure.title || "分区";
 }
@@ -1590,6 +1609,10 @@ function groupGoodLabel(section) {
     "goal-actions": "这个行动感觉好吗？"
   };
   return labels[section.key] || section.goodLabel || "感觉好吗？";
+}
+
+function cardListQuestion(topic) {
+  return topic.type === "want" ? "我对此有什么想要？" : "我对此有什么感受？";
 }
 
 function structuredGroupFields(topic, section, group, definition, index = 0) {
@@ -1834,7 +1857,7 @@ function releaseSetupView() {
   const isFeelingStep = setup.step === "feeling";
   const itemizedContext = isContextStep && structure.type === "itemized";
   const prompt = isSubjectStep
-    ? topic.fields[0]
+    ? topicSubjectPrompt(topic)
     : isGoalActionStep
       ? "为了达成目标要做什么？"
       : isContextStep
