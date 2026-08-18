@@ -20,10 +20,25 @@
 当前主要开发分支：
 
 ```text
-explore/card-record-flow
+main
 ```
 
-这是主分支之外的探索分支，用来尝试新的“卡片列表 + 层层递进详情页”主题释放数据库 UI。不要在没有用户确认的情况下把它合并回 `main`。
+用户已经确认采用原 `explore/card-record-flow` 探索分支的效果。当前 `main` 已经指向这套“卡片列表 + 层层递进详情页”的主题释放数据库 UI，旧主分支内容不再作为正式方向维护。
+
+历史分支状态：
+
+- `explore/card-record-flow`：仍保留，并已同步到与 `main` 相同的最新提交，可作为探索历史参考。
+- `archive/main-before-card-record-flow`：本地备份分支，指向采用卡片递进 UI 之前的旧 `main`。该备份分支尚未推送到远程。
+- 桌面主目录 `C:\Users\sunyue\Desktop\Codex\释放法练习本` 现在是正式 `main` 工作目录。
+- Codex worktree 目录 `C:\Users\sunyue\.codex\worktrees\27a2\释放法练习本` 仍绑定 `explore/card-record-flow`，只是历史/并行工作区，不再是主要开发入口。
+
+本地还有一个保护性 stash：
+
+```text
+stash@{0}: On main: pre-card-flow-main-local-pdf-rename
+```
+
+它保存的是切换 `main` 前桌面目录里未提交的 PDF 文件名变动。不要随手丢弃；如果要处理 PDF 文件名，先查看这个 stash 的内容。
 
 远程仓库：
 
@@ -33,16 +48,16 @@ https://github.com/cloud0023/Sedona-release-workbook.git
 
 当前 GitHub Pages 相关注意：
 
-- 探索分支里 `.github/workflows/pages.yml` 被改为可从 `explore/card-record-flow` 发布。
-- 为绕开 GitHub Pages 环境分支限制，workflow 里曾移除 `environment` 配置。
-- 这不会修改 `main` 分支代码，但 GitHub Pages 项目站点通常只有一个线上 URL，因此发布探索分支可能会影响线上展示内容。
+- `.github/workflows/pages.yml` 已改回只从 `main` 发布。
+- 之前探索期曾让 workflow 从 `explore/card-record-flow` 发布，并移除过 `environment` 配置以绕开 Pages 分支限制；现在正式方向已回到 `main`。
+- GitHub Pages 项目站点通常只有一个线上 URL，所以后续发布应以 `main` 为准。
 - 已知 Pages URL：
 
 ```text
 https://cloud0023.github.io/Sedona-release-workbook/
 ```
 
-需要后续 agent 验证最终 Pages 部署是否成功。
+需要后续 agent 验证 `main` 推送后的 Pages 部署是否成功，以及线上是否已经加载 `v=33` 资源。
 
 ## 3. 运行与检查命令
 
@@ -379,6 +394,9 @@ const MATERIALS_PDF_FILE = "92年资料-释放法配套练习本7649484604780677
 最近这一轮主要完成：
 
 - 新建 `explore/card-record-flow` 探索分支。
+- 用户确认探索分支效果优于旧主分支，已将 `main` 更新为探索分支内容。
+- 旧 `main` 已在本地备份为 `archive/main-before-card-record-flow`。
+- Pages workflow 已改回只从 `main` 发布。
 - 实现递进式卡片 UI。
 - 记录卡片和方面卡片加入展开式删除。
 - 记录摘要补齐多分区显示，不只展示当前分区。
@@ -391,7 +409,7 @@ const MATERIALS_PDF_FILE = "92年资料-释放法配套练习本7649484604780677
 - 调整字体、字号、排版、按钮层级和 responsive grid。
 - 首页增加释放资料 PDF 页面。
 - 释放资料目录从卡片改为简洁 outline。
-- 将当前探索分支推送到 GitHub。
+- 将 `main` 和 `explore/card-record-flow` 推送到 GitHub。
 
 最近提交可用以下命令查看：
 
@@ -402,18 +420,19 @@ git log --oneline -12
 ## 12. 已知风险与待确认
 
 1. GitHub Pages 部署状态需要确认。
-   - 最后一次为了解决 Pages environment gate 已修改 workflow 并推送。
+   - `main` 已推送到 GitHub，Pages workflow 已改回只监听 `main`。
    - 需要检查 GitHub Actions 是否成功，以及线上是否已经是 `v=33`。
 
 2. PDF 资料页需要移动端真机验证。
    - 某些手机浏览器对 iframe 内嵌 PDF 支持不好。
    - 如果体验不好，考虑提供“打开 PDF”按钮作为主路径，iframe 作为桌面增强。
 
-3. 探索分支是否最终替代 main 尚未定。
-   - 继续实现前默认只在 `explore/card-record-flow` 上工作。
-   - 不要擅自合并回主分支。
+3. 旧主分支备份只在本地。
+   - 本地备份分支：`archive/main-before-card-record-flow`。
+   - 该分支尚未推送远程；如果用户明确要求远程备份，再推送。
+   - 不要删除这个本地备份分支，除非用户明确确认。
 
-4. 主题释放数据库新 UI 是探索方向。
+4. 主题释放数据库新 UI 已成为正式方向。
    - 用户对视觉质量要求较高。
    - 不要退回桌面表格感或深层嵌套表单。
 
@@ -464,7 +483,7 @@ git diff --check
 ```powershell
 git add .
 git commit -m "..."
-git push origin explore/card-record-flow
+git push origin main
 ```
 
 ## 14. 面向新 agent 的实现原则
@@ -477,5 +496,5 @@ git push origin explore/card-record-flow
 - 视觉上保持纸感、留白、深绿主动作、金色少量点缀。
 - 如果用户给出截图标注，以截图标注为准。
 - 不要擅自回滚用户已有改动。
-- 不要擅自把探索分支合并到主分支。
-
+- 现在 `main` 已经是卡片递进 UI 正式方向；不要擅自恢复旧主分支内容。
+- 不要删除 `archive/main-before-card-record-flow` 或 `stash@{0}`，除非用户明确确认。
