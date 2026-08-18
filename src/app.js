@@ -236,6 +236,8 @@ const state = {
   expandedGroupId: "",
   expandedCardId: "",
   focusCardId: "",
+  activeDraftCardId: "",
+  emotionReferenceCardId: "",
   releaseSetup: null,
   sessionId: null,
   release: null,
@@ -803,32 +805,34 @@ function emotionIcon(group, index) {
   `;
 }
 
-function emotionPicker() {
+function emotionPicker({ targetCardId = "", selectedText = "" } = {}) {
+  const selectedMeta = emotionMetaForText(selectedText);
+  const referenceId = targetCardId ? `emotion-reference-${targetCardId}` : "";
   return `
-    <div class="emotion-picker" aria-label="九大情绪选择">
+    <div class="emotion-picker ${targetCardId ? "topic-record-emotion-picker" : ""}" ${referenceId ? `id="${escapeHtml(referenceId)}"` : ""} ${targetCardId ? `data-target-card="${escapeHtml(targetCardId)}"` : ""} aria-label="九大情绪选择">
       <div class="emotion-reference-head">
         <b>情绪参考</b>
-        <span>想不到具体感受时使用</span>
+        <span>${targetCardId ? "子情绪用于辨认，选择后写入主情绪" : "想不到具体感受时使用"}</span>
       </div>
       <div class="emotion-card-row">
         ${EMOTION_GROUPS.map((group, index) => `
-          <article class="emotion-card emotion-card-${index}" data-emotion="${group.name}">
-            <button class="emotion-card-main" type="button" data-action="select-emotion" data-emotion="${group.name}" aria-label="${group.name}">
+          <article class="emotion-card emotion-card-${index} ${selectedMeta?.group.name === group.name ? "selected" : ""}" data-emotion="${group.name}">
+            <button class="emotion-card-main" type="button" data-action="select-emotion" data-emotion="${group.name}" aria-label="${group.name}" aria-pressed="${selectedMeta?.group.name === group.name}">
               <span class="emotion-orb"><span class="emotion-icon">${emotionIcon(group, index)}</span></span>
               <strong>${group.name}</strong>
             </button>
             <div class="emotion-action-popover" aria-label="${group.name}子情绪入口">
               <button class="emotion-more-btn" type="button" data-action="open-subemotions" data-emotion="${group.name}">子情绪</button>
             </div>
-            <div class="emotion-subemotion-sheet" data-action="close-subemotions" aria-label="${group.name}子情绪">
-              <div class="emotion-subemotion-panel">
+            <div class="emotion-subemotion-sheet" data-action="close-subemotions" aria-label="${group.name}子情绪" role="dialog" aria-modal="true">
+              <div class="emotion-subemotion-panel" tabindex="-1">
                 <header>
                   <span class="emotion-sheet-icon">${emotionIcon(group, index)}</span>
                   <strong>${group.name}</strong>
                   <button type="button" data-action="close-subemotions">收回</button>
                 </header>
                 <div class="emotion-chip-cloud">
-                  ${group.children.map((child) => `<button type="button" data-action="select-subemotion" data-emotion="${group.name}">${child}</button>`).join("")}
+                  ${group.children.map((child) => `<button type="button" data-action="select-subemotion" data-emotion="${group.name}" data-child-emotion="${child}">${child}</button>`).join("")}
                 </div>
               </div>
             </div>
@@ -1413,7 +1417,7 @@ function recordSectionEditor(topic, structure, record, section) {
   }
   return `
     <section class="progressive-section">
-      <div class="section-line-title">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionHeadingLabel(structure, section))}</h2></div>
+      <div class="section-line-title ${topic.type === "emotion" ? "has-reference-action" : ""}">${iconBubble(topicIconName(topic), "tiny-leaf")}<h2>${escapeHtml(sectionHeadingLabel(structure, section))}</h2>${emotionReferenceHeaderButton(topic, "section", section)}</div>
       ${directCardListEditor(topic, section, section)}
       ${feelsGoodSegment("section", section.feelsGood, "感觉好吗？")}
     </section>
@@ -1459,7 +1463,7 @@ function topicGroupEditPage(topic, record) {
           <input name="groupText" data-draft-group-field="text" value="${escapeHtml(group.text || "")}" placeholder="${escapeHtml(groupPlaceholder(section))}" />
         </section>
         <section class="progressive-section">
-          <div class="section-line-title"><h2>${escapeHtml(cardListQuestion(topic))}</h2></div>
+          <div class="section-line-title ${topic.type === "emotion" ? "has-reference-action" : ""}">${iconBubble("leaf", "tiny-leaf")}<h2>${escapeHtml(cardListQuestion(topic))}</h2>${emotionReferenceHeaderButton(topic, "group", group)}</div>
           ${directCardListEditor(topic, group, group)}
           <button class="dashed-add-btn" type="button" data-action="add-progressive-card" data-container="group">＋ 添加${fieldName(topic)}</button>
         </section>
@@ -1477,7 +1481,10 @@ function directCardListEditor(topic, container, owner) {
   const cards = container.cards || [];
   return `
     <div class="progressive-card-list" data-card-container="${owner.id}">
-      ${cards.map((card) => feelingRow(topic, card)).join("")}
+      ${cards.map((card) => `
+        ${feelingRow(topic, card)}
+        ${topic.type === "emotion" && state.emotionReferenceCardId === card.id ? `<div class="topic-emotion-reference">${emotionPicker({ targetCardId: card.id, selectedText: card.text })}</div>` : ""}
+      `).join("")}
     </div>
     ${owner === container && !sectionCanHaveGroups(currentTopicStructure(), state.editingSectionKey) ? `<button class="dashed-add-btn" type="button" data-action="add-progressive-card" data-container="section">＋ 添加${fieldName(topic)}</button>` : ""}
   `;
@@ -1485,14 +1492,29 @@ function directCardListEditor(topic, container, owner) {
 
 function feelingRow(topic, card) {
   const expanded = state.expandedCardId === card.id;
+  const referenceOpen = topic.type === "emotion" && state.emotionReferenceCardId === card.id;
   return `
-    <div class="feeling-row ${expanded ? "expanded" : ""}" data-card="${escapeHtml(card.id)}">
-      ${cardEmotionIcon(card)}
+    <div class="feeling-row ${expanded ? "expanded" : ""} ${referenceOpen ? "reference-target" : ""}" data-card="${escapeHtml(card.id)}">
+      ${topic.type === "emotion"
+        ? `<button class="emotion-row-trigger" type="button" data-action="toggle-card-emotion-reference" data-card="${escapeHtml(card.id)}" aria-label="为这一条感受打开情绪参考" aria-expanded="${referenceOpen}" aria-controls="emotion-reference-${escapeHtml(card.id)}">${cardEmotionIcon(card)}</button>`
+        : cardEmotionIcon(card)}
       <input data-draft-card-field="text" data-card="${escapeHtml(card.id)}" value="${escapeHtml(card.text || "")}" placeholder="${fieldName(topic)}" />
       <button class="status-chip ${card.released ? "released" : ""}" type="button" data-action="toggle-progressive-card-release" data-card="${escapeHtml(card.id)}">${card.released ? "已释放" : "未释放"}</button>
       <button class="chevron-btn" type="button" data-action="toggle-card-actions" data-card="${escapeHtml(card.id)}" aria-label="更多">›</button>
       ${expanded ? `<button class="text-delete-btn card-inline-delete" type="button" data-action="delete-progressive-card" data-card="${escapeHtml(card.id)}">删除</button>` : ""}
     </div>
+  `;
+}
+
+function emotionReferenceHeaderButton(topic, scope, container) {
+  if (topic.type !== "emotion") return "";
+  const open = (container.cards || []).some((card) => card.id === state.emotionReferenceCardId);
+  return `
+    <button class="emotion-reference-toggle" type="button" data-action="toggle-card-emotion-reference" data-container="${scope}" aria-expanded="${open}">
+      ${iconSvg("leaf")}
+      <span>情绪参考</span>
+      <span class="emotion-reference-caret" aria-hidden="true">⌄</span>
+    </button>
   `;
 }
 
@@ -1515,6 +1537,8 @@ function resetTopicRecordEditing() {
   state.expandedGroupId = "";
   state.expandedCardId = "";
   state.focusCardId = "";
+  state.activeDraftCardId = "";
+  state.emotionReferenceCardId = "";
 }
 
 function beginTopicRecordDraft(topic, record = null) {
@@ -1528,6 +1552,8 @@ function beginTopicRecordDraft(topic, record = null) {
   state.expandedGroupId = "";
   state.expandedCardId = "";
   state.focusCardId = "";
+  state.activeDraftCardId = "";
+  state.emotionReferenceCardId = "";
   state.topicRecordView = "record";
 }
 
@@ -1561,6 +1587,49 @@ function findDraftCard(cardId) {
     }
   }
   return { card: null, container: null };
+}
+
+function referenceTargetCard(scope = "") {
+  const topic = getTopic(state.topicId) || TOPICS[0];
+  const container = currentCardContainer(scope);
+  if (!container || topic.type !== "emotion") return null;
+  container.cards = container.cards || [];
+  let card = container.cards.find((item) => item.id === state.activeDraftCardId);
+  card ||= container.cards.find((item) => !item.text?.trim());
+  card ||= container.cards.at(-1);
+  if (!card) {
+    card = makeCard(topic);
+    container.cards.push(card);
+    container.updatedAt = nowIso();
+    const record = draftRecord();
+    if (record) record.updatedAt = nowIso();
+  }
+  return card;
+}
+
+function applyEmotionSelection(action, emotion) {
+  const picker = action.closest(".emotion-picker");
+  const targetCardId = picker?.dataset.targetCard || "";
+  if (targetCardId) {
+    const record = draftRecord();
+    const { card, container } = findDraftCard(targetCardId);
+    if (!record || !card || !container) return;
+    card.text = emotion;
+    card.updatedAt = nowIso();
+    container.updatedAt = nowIso();
+    record.updatedAt = nowIso();
+    state.activeDraftCardId = card.id;
+    const input = document.querySelector(`[data-draft-card-field][data-card="${card.id}"]`);
+    if (input) input.value = emotion;
+    const trigger = document.querySelector(`.emotion-row-trigger[data-card="${card.id}"]`);
+    if (trigger) trigger.innerHTML = cardEmotionIcon(card);
+    return;
+  }
+  const input = action.closest("form")?.querySelector('input[name="feeling"]') || action.closest(".release-stage")?.querySelector('form input[name="feeling"]');
+  if (input) {
+    input.value = emotion;
+    input.blur();
+  }
 }
 
 function normalizeRecordForSave(record) {
@@ -2506,6 +2575,8 @@ function handleBack() {
       state.topicRecordView = "record";
       state.editingGroupId = "";
       state.expandedCardId = "";
+      state.activeDraftCardId = "";
+      state.emotionReferenceCardId = "";
       render();
       return;
     }
@@ -2565,15 +2636,13 @@ app.addEventListener("click", async (event) => {
       return;
     }
     ignoreNextEmotionClick = false;
-    const input = action.closest("form")?.querySelector('input[name="feeling"]') || action.closest(".release-stage")?.querySelector('form input[name="feeling"]');
-    if (input) {
-      input.value = action.dataset.emotion;
-      input.blur();
-      action.closest(".emotion-picker")?.querySelectorAll(".emotion-card").forEach((card) => {
-        card.classList.toggle("selected", card.dataset.emotion === action.dataset.emotion);
-        card.classList.remove("subemotion-open");
-      });
-    }
+    applyEmotionSelection(action, action.dataset.emotion);
+    action.closest(".emotion-picker")?.querySelectorAll(".emotion-card").forEach((card) => {
+      const selected = card.dataset.emotion === action.dataset.emotion;
+      card.classList.toggle("selected", selected);
+      card.querySelector(".emotion-card-main")?.setAttribute("aria-pressed", String(selected));
+      card.classList.remove("subemotion-open");
+    });
   }
   if (name === "open-subemotions") {
     const picker = action.closest(".emotion-picker");
@@ -2581,20 +2650,18 @@ app.addEventListener("click", async (event) => {
       card.classList.toggle("selected", card.dataset.emotion === action.dataset.emotion);
       card.classList.toggle("subemotion-open", card.dataset.emotion === action.dataset.emotion);
     });
+    window.setTimeout(() => action.closest(".emotion-card")?.querySelector(".emotion-subemotion-panel")?.focus(), 0);
   }
   if (name === "close-subemotions") {
     if (action.classList.contains("emotion-subemotion-sheet") && event.target.closest(".emotion-subemotion-panel")) return;
     action.closest(".emotion-card")?.classList.remove("subemotion-open");
   }
   if (name === "select-subemotion") {
-    const input = action.closest(".release-stage")?.querySelector('form input[name="feeling"]');
     const card = action.closest(".emotion-card");
-    if (input) {
-      input.value = action.dataset.emotion;
-      input.blur();
-    }
+    applyEmotionSelection(action, action.dataset.emotion);
     card?.closest(".emotion-picker")?.querySelectorAll(".emotion-card").forEach((item) => {
       item.classList.toggle("selected", item === card);
+      item.querySelector(".emotion-card-main")?.setAttribute("aria-pressed", String(item === card));
       item.classList.remove("subemotion-open");
     });
   }
@@ -2627,6 +2694,8 @@ app.addEventListener("click", async (event) => {
     state.editingGroupId = "";
     state.expandedGroupId = "";
     state.expandedCardId = "";
+    state.activeDraftCardId = "";
+    state.emotionReferenceCardId = "";
     render();
   }
   if (name === "add-progressive-group") {
@@ -2648,6 +2717,8 @@ app.addEventListener("click", async (event) => {
     state.editingGroupId = action.dataset.group;
     state.expandedGroupId = "";
     state.expandedCardId = "";
+    state.activeDraftCardId = "";
+    state.emotionReferenceCardId = "";
     state.topicRecordView = "group";
     render();
   }
@@ -2675,8 +2746,32 @@ app.addEventListener("click", async (event) => {
       container.cards.push(card);
       container.updatedAt = nowIso();
       state.focusCardId = card.id;
+      state.activeDraftCardId = card.id;
       render();
       window.setTimeout(() => document.querySelector(`[data-draft-card-field][data-card="${card.id}"]`)?.focus(), 80);
+    }
+  }
+  if (name === "toggle-card-emotion-reference") {
+    const target = action.dataset.card ? findDraftCard(action.dataset.card).card : referenceTargetCard(action.dataset.container);
+    if (target) {
+      const closing = state.emotionReferenceCardId === target.id;
+      state.activeDraftCardId = target.id;
+      state.emotionReferenceCardId = closing ? "" : target.id;
+      render();
+      if (!closing) {
+        window.setTimeout(() => {
+          document.querySelector(`.emotion-row-trigger[data-card="${target.id}"]`)?.focus();
+          const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          const reference = document.querySelector(`#emotion-reference-${target.id}`);
+          reference?.scrollIntoView({ block: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+          const emotionRow = reference?.querySelector(".emotion-card-row");
+          const selectedEmotion = emotionRow?.querySelector(".emotion-card.selected");
+          if (emotionRow && selectedEmotion) {
+            const selectedCenter = selectedEmotion.offsetLeft + selectedEmotion.offsetWidth / 2;
+            emotionRow.scrollTo({ left: Math.max(0, selectedCenter - emotionRow.clientWidth / 2), behavior: reducedMotion ? "auto" : "smooth" });
+          }
+        }, 40);
+      }
     }
   }
   if (name === "toggle-progressive-card-release") {
@@ -2697,6 +2792,8 @@ app.addEventListener("click", async (event) => {
       container.cards = (container.cards || []).filter((item) => item.id !== card.id);
       container.updatedAt = nowIso();
       state.expandedCardId = "";
+      if (state.activeDraftCardId === card.id) state.activeDraftCardId = "";
+      if (state.emotionReferenceCardId === card.id) state.emotionReferenceCardId = "";
       render();
     }
   }
@@ -2970,6 +3067,20 @@ app.addEventListener("click", (event) => {
   choice.classList.add("selected");
   const hidden = group.parentElement.querySelector(`input[name="${group.dataset.choice}"]`);
   if (hidden) hidden.value = choice.dataset.value;
+});
+
+app.addEventListener("focusin", (event) => {
+  const input = event.target.closest?.("[data-draft-card-field]");
+  if (input) state.activeDraftCardId = input.dataset.card || "";
+});
+
+app.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const openSubemotion = document.querySelector(".emotion-card.subemotion-open");
+  if (openSubemotion) {
+    openSubemotion.classList.remove("subemotion-open");
+    openSubemotion.querySelector(".emotion-more-btn")?.focus();
+  }
 });
 
 app.addEventListener("input", (event) => {

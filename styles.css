@@ -2121,6 +2121,14 @@ select:focus {
   gap: var(--space-sm);
 }
 
+.section-line-title.has-reference-action {
+  grid-template-columns: auto minmax(0, max-content) 1fr auto;
+}
+
+.section-line-title.has-reference-action::after {
+  grid-column: 3;
+}
+
 .section-line-title::after {
   content: "";
   height: 1px;
@@ -2135,6 +2143,43 @@ select:focus {
   font-size: 1.12rem;
   line-height: 1.35;
   font-weight: 800;
+}
+
+.emotion-reference-toggle {
+  grid-column: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--space-sm);
+  color: color-mix(in oklch, var(--teal-dark) 82%, var(--muted));
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.emotion-reference-toggle svg {
+  width: 17px;
+  height: 17px;
+  color: color-mix(in oklch, var(--gold) 72%, var(--teal));
+}
+
+.emotion-reference-caret {
+  font-size: 1rem;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.emotion-reference-toggle[aria-expanded="true"] {
+  color: var(--teal-dark);
+  background: color-mix(in oklch, var(--green) 14%, transparent);
+}
+
+.emotion-reference-toggle[aria-expanded="true"] .emotion-reference-caret {
+  transform: rotate(180deg);
 }
 
 .dashed-add-btn {
@@ -2163,6 +2208,13 @@ select:focus {
   background: color-mix(in oklch, var(--surface) 96%, var(--paper));
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) + 8px);
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.feeling-row.reference-target {
+  background: color-mix(in oklch, var(--surface) 90%, var(--green));
+  border-color: color-mix(in oklch, var(--teal) 34%, var(--line));
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--green) 18%, transparent);
 }
 
 .feeling-row.expanded {
@@ -2184,6 +2236,61 @@ select:focus {
 
 .emotion-list-icon.muted {
   color: var(--soft);
+}
+
+.emotion-row-trigger {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+}
+
+.emotion-row-trigger .emotion-list-icon {
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.emotion-row-trigger:active .emotion-list-icon {
+  transform: scale(0.96);
+}
+
+.emotion-row-trigger[aria-expanded="true"] .emotion-list-icon {
+  color: var(--teal-dark);
+  background: color-mix(in oklch, var(--surface) 70%, var(--green));
+}
+
+.emotion-reference-toggle:focus-visible,
+.emotion-row-trigger:focus-visible,
+.emotion-card-main:focus-visible,
+.emotion-more-btn:focus-visible,
+.emotion-chip-cloud button:focus-visible,
+.emotion-subemotion-panel header button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.topic-emotion-reference {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md) 0 var(--space-xs);
+  border-top: 1px solid color-mix(in oklch, var(--gold) 42%, var(--line));
+  scroll-margin-block: 96px 112px;
+}
+
+.topic-record-emotion-picker {
+  min-width: 0;
+}
+
+.topic-record-emotion-picker .emotion-reference-head {
+  align-items: center;
+}
+
+.topic-record-emotion-picker .emotion-reference-head span {
+  max-width: 24em;
+  text-align: right;
 }
 
 .status-chip {
@@ -2528,6 +2635,31 @@ select:focus {
 }
 
 @media (max-width: 520px) {
+  .section-line-title.has-reference-action {
+    grid-template-columns: auto minmax(0, max-content) 1fr;
+  }
+
+  .section-line-title.has-reference-action::after {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .section-line-title.has-reference-action .emotion-reference-toggle {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    justify-self: start;
+    margin-left: calc(var(--space-sm) * -1);
+  }
+
+  .topic-emotion-reference {
+    margin-inline: calc(var(--space-sm) * -1);
+  }
+
+  .topic-record-emotion-picker .emotion-reference-head span {
+    max-width: none;
+    text-align: left;
+  }
+
   .emotion-reference-head {
     display: grid;
     justify-content: start;
@@ -2581,5 +2713,25 @@ select:focus {
 
   .emotion-action-popover {
     top: 86px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .emotion-reference-toggle:hover {
+    color: var(--teal-dark);
+    background: color-mix(in oklch, var(--green) 12%, transparent);
+  }
+
+  .emotion-row-trigger:hover .emotion-list-icon {
+    color: var(--teal-dark);
+    background: color-mix(in oklch, var(--surface) 74%, var(--green));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emotion-reference-caret,
+  .emotion-row-trigger .emotion-list-icon,
+  .feeling-row {
+    transition: none;
   }
 }
