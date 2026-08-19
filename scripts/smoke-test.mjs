@@ -20,7 +20,13 @@ const requiredSnippets = [
   "sectionsFromForm",
   "我对此有什么感受？",
   "我对此有什么想要？",
-  "topicRecords"
+  "topicRecords",
+  "topicSeries",
+  "const DB_VERSION = 2",
+  "summarizeAttempt",
+  "主题释放次数",
+  "再次释放",
+  "尚未填写感受 · 进行中"
 ];
 
 for (const snippet of requiredSnippets) {

@@ -1,6 +1,6 @@
 const DB_NAME = "sedona-workbook";
-const DB_VERSION = 1;
-const STORES = ["sessions", "rounds", "topicRecords", "goals", "actions", "gains"];
+const DB_VERSION = 2;
+const STORES = ["sessions", "rounds", "topicRecords", "topicSeries", "goals", "actions", "gains"];
 
 const EMOTION_PROMPTS = [
   "允许自己感受它吗？",
@@ -226,6 +226,7 @@ const state = {
   route: "home",
   topicId: null,
   selectedTopicRecordId: null,
+  selectedTopicSeriesId: null,
   topicRecordMode: "list",
   topicRecordView: "list",
   editingRecordId: null,
@@ -248,6 +249,7 @@ const state = {
     sessions: [],
     rounds: [],
     topicRecords: [],
+    topicSeries: [],
     goals: [],
     actions: [],
     gains: []
@@ -470,12 +472,13 @@ function makeSection(definition, withGroups = false) {
   };
 }
 
-function makeStructuredRecord(topic, subject = "") {
+function makeStructuredRecord(topic, subject = "", seriesId = "") {
   const structure = topicStructure(topic);
   const stamp = nowIso();
   const recordSubject = subject || defaultTopicRecordSubject(topic);
   return {
     id: uid("topic"),
+    seriesId,
     topicId: topic.id,
     schemaVersion: STRUCTURED_SCHEMA_VERSION,
     structureType: structure.type,
@@ -490,6 +493,45 @@ function makeStructuredRecord(topic, subject = "") {
 
 function activeTopicRecords(topicId) {
   return state.data.topicRecords.filter((record) => record.topicId === topicId && isV2Record(record));
+}
+
+function formatShortDate(value) {
+  if (!value) return "未记录";
+  const date = new Date(value);
+  return `${date.getMonth() + 1}月${date.getDate()}日`;
+}
+
+function makeTopicSeries(topic, subject = "", id = uid("series"), createdAt = nowIso()) {
+  return {
+    id,
+    topicId: topic.id,
+    subject: subject || defaultTopicRecordSubject(topic),
+    createdAt,
+    updatedAt: createdAt
+  };
+}
+
+function recordsForSeries(seriesId) {
+  return state.data.topicRecords
+    .filter((record) => isV2Record(record) && record.seriesId === seriesId)
+    .sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+}
+
+function activeTopicSeries(topicId) {
+  return state.data.topicSeries
+    .filter((series) => series.topicId === topicId && recordsForSeries(series.id).length)
+    .sort((a, b) => latestAttemptAt(b).localeCompare(latestAttemptAt(a)));
+}
+
+function latestAttemptAt(series) {
+  return recordsForSeries(series.id).reduce((latest, record) => (record.createdAt || "") > latest ? record.createdAt : latest, "");
+}
+
+function seriesInProgressSession(seriesId) {
+  const recordIds = new Set(recordsForSeries(seriesId).map((record) => record.id));
+  return state.data.sessions
+    .filter((session) => session.status === "in-progress" && recordIds.has(session.recordId))
+    .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))[0] || null;
 }
 
 function findSection(record, sectionIdOrKey) {
@@ -539,15 +581,7 @@ function summarizeStructuredRecord(record) {
   if (!isV2Record(record)) return ["旧记录"];
   const baseTopic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
   const topic = record.releaseType ? { ...baseTopic, type: record.releaseType } : baseTopic;
-  const structure = topicStructure(topic);
-  return record.sections.map((section) => {
-    if (sectionCanHaveGroups(structure, section.key)) {
-      const cardCount = (section.groups || []).reduce((total, group) => total + (group.cards || []).length, 0);
-      return `${section.title}：${(section.groups || []).length} 条 · ${cardCount} 个${fieldName(topic)}`;
-    }
-    const suffix = section.feelsGood ? "感觉好了" : "还不好";
-    return `${section.title}：${(section.cards || []).length} 个${fieldName(topic)} · ${suffix}`;
-  });
+  return summarizeAttempt(topic, record).map(attemptSummaryText);
 }
 
 function cloneRecord(record) {
@@ -626,11 +660,13 @@ function addGroupLabelForSection(structure, section) {
 }
 
 function sectionStats(section) {
-  const groups = section.groups || [];
-  const cards = groups.length ? groups.flatMap((group) => group.cards || []) : (section.cards || []);
+  const groups = (section.groups || []).filter((group) => group.text?.trim() || (group.cards || []).some((card) => card.text?.trim()));
+  const cards = groups.length
+    ? groups.flatMap((group) => (group.cards || []).filter((card) => card.text?.trim()))
+    : (section.cards || []).filter((card) => card.text?.trim());
   const released = cards.filter((card) => card.released).length;
   const feelsGood = groups.length
-    ? groups.length > 0 && groups.every((group) => group.feelsGood)
+    ? groups.filter((group) => (group.cards || []).some((card) => card.text?.trim())).every((group) => group.feelsGood)
     : Boolean(section.feelsGood);
   return {
     groupCount: groups.length,
@@ -886,6 +922,71 @@ function deleteStore(store, id) {
 
 async function loadData() {
   for (const store of STORES) state.data[store] = await readStore(store);
+  const changed = await migrateTopicSeries();
+  if (changed) {
+    state.data.topicRecords = await readStore("topicRecords");
+    state.data.topicSeries = await readStore("topicSeries");
+  }
+}
+
+async function deleteTopicRecordData(recordId) {
+  const sessions = state.data.sessions.filter((session) => session.recordId === recordId);
+  for (const session of sessions) {
+    for (const round of state.data.rounds.filter((item) => item.sessionId === session.id)) await deleteStore("rounds", round.id);
+    await deleteStore("sessions", session.id);
+  }
+  await deleteStore("topicRecords", recordId);
+}
+
+function summarizeAttempt(topic, record) {
+  if (!isV2Record(record)) return [];
+  const structure = topicStructure(topic);
+  const populated = record.sections.map((section) => {
+    const stats = sectionStats(section);
+    return {
+      label: sectionLabel(structure, section),
+      groupCount: stats.groupCount,
+      totalCards: stats.cardCount,
+      releasedCards: stats.released,
+      feelsGood: stats.feelsGood,
+      inProgress: stats.cardCount === 0,
+      hasGroups: sectionCanHaveGroups(structure, section.key),
+      unit: groupUnitLabel(structure, section)
+    };
+  }).filter((summary) => summary.totalCards > 0 || summary.groupCount > 0);
+  if (!populated.length) return [{ label: "", groupCount: 0, totalCards: 0, releasedCards: 0, feelsGood: false, inProgress: true, hasGroups: false, unit: "" }];
+  if (record.sections.length === 1 && !populated[0].hasGroups) populated[0].label = "";
+  return populated;
+}
+
+function attemptSummaryText(summary) {
+  if (summary.inProgress) return "尚未填写感受 · 进行中";
+  const parts = [];
+  if (summary.label) parts.push(summary.label);
+  if (summary.hasGroups) parts.push(`${summary.groupCount} 个${summary.unit}`);
+  parts.push(`${summary.releasedCards}/${summary.totalCards} 已释放`);
+  parts.push(summary.feelsGood ? "感觉好了" : "还没感觉好");
+  return parts.join(" · ");
+}
+
+async function migrateTopicSeries() {
+  let changed = false;
+  const knownSeries = new Set(state.data.topicSeries.map((series) => series.id));
+  for (const record of state.data.topicRecords.filter(isV2Record)) {
+    const seriesId = record.seriesId || `series-legacy-${record.id}`;
+    if (!knownSeries.has(seriesId)) {
+      const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
+      await putStore("topicSeries", makeTopicSeries(topic, record.subject, seriesId, record.createdAt || nowIso()));
+      knownSeries.add(seriesId);
+      changed = true;
+    }
+    if (!record.seriesId) {
+      record.seriesId = seriesId;
+      await putStore("topicRecords", record);
+      changed = true;
+    }
+  }
+  return changed;
 }
 
 async function save(store, value) {
@@ -1001,6 +1102,21 @@ function recordMarkdown(record) {
   return lines.filter((line) => line !== "").join("\n");
 }
 
+function seriesMarkdown(series) {
+  const records = recordsForSeries(series.id);
+  const attempts = [...records].reverse().map((record) => {
+    const attemptNo = records.indexOf(record) + 1;
+    const detail = recordMarkdown(record)
+      .split("\n")
+      .slice(1)
+      .join("\n")
+      .replace(/^### /gm, "#### ")
+      .replace(/^## /gm, "### ");
+    return `## 第 ${attemptNo} 次 · ${(record.createdAt || "").slice(0, 10)}\n${detail}`;
+  });
+  return [`# 主题：${markdownEscape(series.subject || "未命名释放")}`, `主题释放次数：${records.length}`, ...attempts].join("\n\n");
+}
+
 function gainMarkdown(gain) {
   const topic = getTopic(gain.topicId);
   return [
@@ -1112,15 +1228,15 @@ function downloadBlob(blob, filename) {
 }
 
 function exportTopicRecords() {
-  const records = state.data.topicRecords
-    .filter(isV2Record)
-    .sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
-  if (!records.length) return showToast("还没有可导出的释放记录");
-  const files = records.map((record) => {
-    const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
+  const seriesList = state.data.topicSeries
+    .filter((series) => recordsForSeries(series.id).length)
+    .sort((a, b) => latestAttemptAt(a).localeCompare(latestAttemptAt(b)));
+  if (!seriesList.length) return showToast("还没有可导出的释放记录");
+  const files = seriesList.map((series) => {
+    const topic = getTopic(series.topicId) || FREE_RELEASE_TOPIC;
     const folder = safeFilePart(topic.title);
-    const filename = `${safeFilePart(record.subject || "释放内容")}-${fileTime(record.createdAt)}.md`;
-    return { path: `${folder}/${filename}`, content: recordMarkdown(record) };
+    const filename = `${safeFilePart(series.subject || "释放内容")}-${fileTime(series.createdAt)}.md`;
+    return { path: `${folder}/${filename}`, content: seriesMarkdown(series) };
   });
   downloadBlob(makeZip(files), `主题释放数据库-${fileTime()}.zip`);
   showToast("主题释放数据库已导出");
@@ -1237,7 +1353,7 @@ function topicsView() {
       </div>
       <div class="topic-list">
         ${topics.map((topic) => {
-          const count = activeTopicRecords(topic.id).length;
+          const count = activeTopicSeries(topic.id).length;
           return `
             <button class="list-card" data-topic="${topic.id}">
               <header>
@@ -1247,7 +1363,7 @@ function topicsView() {
               <div class="pill-row">
                 <span class="pill">${topic.workbookType}</span>
                 <span class="pill">${modeLabel(topic.type)}</span>
-                <span class="pill">${count} 条</span>
+                <span class="pill">${count} 个主题</span>
               </div>
               <p>${topic.guidance}</p>
             </button>
@@ -1309,9 +1425,13 @@ function materialsView() {
 
 function topicDetailView() {
   const topic = getTopic(state.topicId) || TOPICS[0];
-  const records = activeTopicRecords(topic.id);
+  const seriesList = activeTopicSeries(topic.id);
   if (state.topicRecordView === "record" && draftRecord()) return topicRecordEditPage(topic, draftRecord());
   if (state.topicRecordView === "group" && draftRecord()) return topicGroupEditPage(topic, draftRecord());
+  if (state.topicRecordView === "series") {
+    const series = state.data.topicSeries.find((item) => item.id === state.selectedTopicSeriesId);
+    if (series) return topicSeriesPage(topic, series);
+  }
   state.topicRecordView = "list";
   return appFrame(`
     <main class="screen topic-record-list-screen">
@@ -1323,12 +1443,12 @@ function topicDetailView() {
       </section>
       <section class="record-list-section">
         <div class="section-heading-row record-list-heading">
-          <h2 class="section-title">释放记录</h2>
+          <h2 class="section-title">主题系列</h2>
           <button class="primary-btn compact-primary" type="button" data-action="new-topic-record" data-topic="${topic.id}">${iconSvg("release")} 新建记录</button>
         </div>
-        ${records.length ? `
+        ${seriesList.length ? `
           <div class="record-card-list">
-            ${records.map((record) => topicRecordSummaryCard(topic, record)).join("")}
+            ${seriesList.map((series) => topicSeriesSummaryCard(topic, series)).join("")}
           </div>
         ` : `<div class="empty calm-empty">还没有记录。新建一条记录，从一个主题开始。</div>`}
       </section>
@@ -1336,25 +1456,63 @@ function topicDetailView() {
   `);
 }
 
-function topicRecordSummaryCard(topic, record) {
-  const summaries = recordSectionSummaries(topic, record);
+function topicSeriesSummaryCard(topic, series) {
+  const records = recordsForSeries(series.id);
+  const latest = records.at(-1);
+  const inProgress = seriesInProgressSession(series.id);
+  const isInProgress = Boolean(inProgress) || allRecordCards(latest).length === 0;
+  const status = isInProgress ? "进行中" : recordIsGood(latest) ? "感觉好了" : "还没感觉好";
+  return `
+    <article class="release-record-card series-summary-card">
+      ${iconBubble(topicIconName(topic), "release-record-icon")}
+      <button class="release-record-main" type="button" data-action="open-topic-series" data-series="${series.id}">
+        <strong>${escapeHtml(series.subject || "未命名释放")}</strong>
+        <small>主题释放 ${records.length} 次 · 最近 ${formatShortDate(latestAttemptAt(series))}</small>
+        <span class="series-status ${isInProgress ? "is-progress" : recordIsGood(latest) ? "is-good" : "not-good"}">${status}</span>
+      </button>
+      <button class="chevron-btn" type="button" data-action="open-topic-series" data-series="${series.id}" aria-label="查看主题系列">›</button>
+    </article>
+  `;
+}
+
+function topicSeriesPage(topic, series) {
+  const records = recordsForSeries(series.id);
+  const descending = [...records].reverse();
+  const inProgress = seriesInProgressSession(series.id);
+  return appFrame(`
+    <main class="screen topic-series-screen">
+      <section class="series-detail-hero">
+        <div>
+          <span class="eyebrow">${escapeHtml(topic.title)}</span>
+          <h1 class="screen-title">${escapeHtml(series.subject || "未命名释放")}</h1>
+          <p>主题释放 ${records.length} 次</p>
+        </div>
+        <button class="primary-btn compact-primary" type="button" data-action="${inProgress ? "resume-session" : "release-again"}" ${inProgress ? `data-session="${inProgress.id}"` : `data-series="${series.id}"`}>
+          ${inProgress ? "继续本次释放" : "再次释放"}
+        </button>
+      </section>
+      <section class="record-list-section">
+        <div class="section-heading-row"><h2 class="section-title">释放历程</h2></div>
+        <div class="attempt-card-list">
+          ${descending.map((record) => topicAttemptCard(topic, record, records.indexOf(record) + 1)).join("")}
+        </div>
+        <button class="soft-btn danger-btn series-delete-btn" type="button" data-action="delete-topic-series" data-series="${series.id}">删除整个主题系列</button>
+      </section>
+    </main>
+  `);
+}
+
+function topicAttemptCard(topic, record, attemptNo) {
+  const summaries = summarizeAttempt(topic, record);
   const expanded = state.expandedRecordId === record.id;
   return `
-    <article class="release-record-card ${expanded ? "expanded" : ""}">
-      ${iconBubble(topicIconName(topic), "release-record-icon")}
-      <button class="release-record-main" type="button" data-action="edit-topic-record-card" data-record="${record.id}">
-        <strong>${escapeHtml(record.subject || "未命名释放")}</strong>
-        <small>${formatDate(record.createdAt)}</small>
-        <span class="record-chip-row">
-          ${summaries.map((summary) => `
-            <span class="summary-chip">${escapeHtml(summary.primary)}</span>
-            <span class="summary-chip">${summary.release}</span>
-            <span class="summary-chip good-chip ${summary.good ? "is-good" : "not-good"}">${summary.good ? "感觉好了" : "还没感觉好"}</span>
-          `).join("")}
-        </span>
+    <article class="attempt-card ${expanded ? "expanded" : ""}">
+      <button class="attempt-card-main" type="button" data-action="edit-topic-record-card" data-record="${record.id}">
+        <strong>第 ${attemptNo} 次 · ${formatShortDate(record.createdAt)}</strong>
+        <span class="attempt-summary-lines">${summaries.map((summary) => `<small>${escapeHtml(attemptSummaryText(summary))}</small>`).join("")}</span>
       </button>
-      <button class="chevron-btn record-expand-btn" type="button" data-action="toggle-record-actions" data-record="${record.id}" aria-label="展开记录操作">›</button>
-      ${expanded ? `<button class="text-delete-btn record-inline-delete" type="button" data-action="delete-record" data-record="${record.id}">删除记录</button>` : ""}
+      <button class="chevron-btn" type="button" data-action="toggle-record-actions" data-record="${record.id}" aria-label="展开本次释放操作">›</button>
+      ${expanded ? `<button class="text-delete-btn attempt-inline-delete" type="button" data-action="delete-record" data-record="${record.id}">删除本次释放</button>` : ""}
     </article>
   `;
 }
@@ -1528,7 +1686,7 @@ function feelsGoodSegment(scope, checked, label) {
 }
 
 function resetTopicRecordEditing() {
-  state.topicRecordView = "list";
+  state.topicRecordView = state.selectedTopicSeriesId ? "series" : "list";
   state.editingRecordId = null;
   state.editingDraftRecord = null;
   state.editingSectionKey = "";
@@ -1543,6 +1701,7 @@ function resetTopicRecordEditing() {
 
 function beginTopicRecordDraft(topic, record = null) {
   const draft = record ? cloneRecord(record) : makeStructuredRecord(topic);
+  if (record?.seriesId) state.selectedTopicSeriesId = record.seriesId;
   state.editingRecordId = record?.id || null;
   state.selectedTopicRecordId = record?.id || null;
   state.editingDraftRecord = draft;
@@ -1555,6 +1714,24 @@ function beginTopicRecordDraft(topic, record = null) {
   state.activeDraftCardId = "";
   state.emotionReferenceCardId = "";
   state.topicRecordView = "record";
+}
+
+async function persistTopicRecord(record) {
+  const topic = getTopic(record.topicId) || FREE_RELEASE_TOPIC;
+  let series = state.data.topicSeries.find((item) => item.id === record.seriesId);
+  if (!series) {
+    series = makeTopicSeries(topic, record.subject, record.seriesId || uid("series"), record.createdAt || nowIso());
+    record.seriesId = series.id;
+  }
+  const subject = record.subject || series.subject || defaultTopicRecordSubject(topic);
+  series.subject = subject;
+  series.updatedAt = nowIso();
+  record.subject = subject;
+  await putStore("topicSeries", series);
+  const siblingRecords = state.data.topicRecords.filter((item) => item.seriesId === series.id && item.id !== record.id);
+  for (const sibling of siblingRecords) await putStore("topicRecords", { ...sibling, subject, updatedAt: sibling.updatedAt });
+  await putStore("topicRecords", record);
+  return series;
 }
 
 function currentDraftSection() {
@@ -2515,9 +2692,10 @@ function currentReleaseTarget() {
   return { session, record, ...target };
 }
 
-async function createStructuredReleaseSession({ topic, subject, sectionKey, groupText = "", feeling, source = "topic-record", goalId = "", actionId = "", record = null }) {
-  const workingRecord = record || makeStructuredRecord(topic, subject);
+async function createStructuredReleaseSession({ topic, subject, sectionKey, groupText = "", feeling, source = "topic-record", goalId = "", actionId = "", record = null, seriesId = "" }) {
+  const workingRecord = record || makeStructuredRecord(topic, subject, seriesId);
   workingRecord.subject = subject;
+  if (seriesId) workingRecord.seriesId = seriesId;
   if (goalId) workingRecord.goalId = goalId;
   const structure = topicStructure(topic);
   const section = findSection(workingRecord, sectionKey) || workingRecord.sections[0];
@@ -2539,9 +2717,10 @@ async function createStructuredReleaseSession({ topic, subject, sectionKey, grou
   container.cards.push(card);
   section.updatedAt = nowIso();
   workingRecord.updatedAt = nowIso();
-  await putStore("topicRecords", workingRecord);
+  const series = await persistTopicRecord(workingRecord);
   await loadData();
   state.selectedTopicRecordId = workingRecord.id;
+  state.selectedTopicSeriesId = series.id;
   const structurePath = {
     sectionId: section.id,
     groupId: group?.id || "",
@@ -2585,6 +2764,12 @@ function handleBack() {
       render();
       return;
     }
+    if (state.topicRecordView === "series") {
+      state.selectedTopicSeriesId = null;
+      state.topicRecordView = "list";
+      render();
+      return;
+    }
     return setRoute("topics");
   }
   if (state.route === "releaseSetup") return setRoute("releaseStart", { releaseSetup: null });
@@ -2605,7 +2790,7 @@ app.addEventListener("click", async (event) => {
   const topicButton = event.target.closest("[data-topic]");
   if (topicButton) {
     resetTopicRecordEditing();
-    setRoute("topicDetail", { topicId: topicButton.dataset.topic, topicRecordMode: "list", topicRecordView: "list" });
+    setRoute("topicDetail", { topicId: topicButton.dataset.topic, selectedTopicSeriesId: null, topicRecordMode: "list", topicRecordView: "list" });
   }
 
   const action = event.target.closest("[data-action]");
@@ -2673,6 +2858,7 @@ app.addEventListener("click", async (event) => {
   }
   if (name === "new-topic-record") {
     const topic = getTopic(action.dataset.topic) || getTopic(state.topicId) || TOPICS[0];
+    state.selectedTopicSeriesId = null;
     beginTopicRecordDraft(topic);
     render();
     window.setTimeout(() => document.querySelector('[data-draft-field="subject"]')?.focus(), 80);
@@ -2749,6 +2935,28 @@ app.addEventListener("click", async (event) => {
       state.activeDraftCardId = card.id;
       render();
       window.setTimeout(() => document.querySelector(`[data-draft-card-field][data-card="${card.id}"]`)?.focus(), 80);
+    }
+  }
+  if (name === "open-topic-series") {
+    state.selectedTopicSeriesId = action.dataset.series;
+    state.topicRecordView = "series";
+    state.expandedRecordId = "";
+    render();
+  }
+  if (name === "release-again") {
+    const series = state.data.topicSeries.find((item) => item.id === action.dataset.series);
+    const topic = getTopic(series?.topicId);
+    if (series && topic) {
+      const structure = topicStructure(topic);
+      const needsContext = topic.id !== "goal" && (structure.sections.length > 1 || COMPLEX_TOPIC_IDS.has(topic.id));
+      state.releaseSetup = {
+        topicId: topic.id,
+        step: topic.id === "goal" ? "feeling" : needsContext ? "context" : "feeling",
+        subject: series.subject,
+        seriesId: series.id,
+        sectionKey: topic.id === "goal" ? "goal-feelings" : structure.sections[0]?.key || "default"
+      };
+      setRoute("releaseSetup");
     }
   }
   if (name === "toggle-card-emotion-reference") {
@@ -2982,11 +3190,28 @@ app.addEventListener("click", async (event) => {
   }
   if (name === "delete-record") {
     const record = state.data.topicRecords.find((item) => item.id === action.dataset.record);
-    if (!window.confirm(`删除「${record?.subject || "未命名释放"}」这条释放记录？删除后无法恢复。`)) return;
-    await deleteStore("topicRecords", action.dataset.record);
+    if (!window.confirm(`删除这一次释放记录？删除后无法恢复。`)) return;
+    const seriesId = record?.seriesId || "";
+    await deleteTopicRecordData(action.dataset.record);
+    if (seriesId && !state.data.topicRecords.some((item) => item.seriesId === seriesId && item.id !== action.dataset.record)) {
+      await deleteStore("topicSeries", seriesId);
+      state.selectedTopicSeriesId = null;
+    }
     await loadData();
     state.selectedTopicRecordId = null;
-    state.topicRecordMode = "list";
+    state.topicRecordView = state.selectedTopicSeriesId ? "series" : "list";
+    render();
+  }
+  if (name === "delete-topic-series") {
+    const series = state.data.topicSeries.find((item) => item.id === action.dataset.series);
+    const records = recordsForSeries(action.dataset.series);
+    if (!series || !window.confirm(`这会删除该主题下的全部 ${records.length} 次释放记录，删除后无法恢复。`)) return;
+    for (const record of records) await deleteTopicRecordData(record.id);
+    await deleteStore("topicSeries", series.id);
+    await loadData();
+    state.selectedTopicSeriesId = null;
+    state.selectedTopicRecordId = null;
+    state.topicRecordView = "list";
     render();
   }
   if (name === "delete-gain") {
@@ -3120,9 +3345,14 @@ app.addEventListener("submit", async (event) => {
       record.subject = data.subject || record.subject || "";
       record.gain = data.gain || record.gain || "";
       const normalized = normalizeRecordForSave(record);
-      await putStore("topicRecords", normalized);
+      if (!allRecordCards(normalized).length && !state.editingRecordId) {
+        showToast("请先填写至少一条感受或想要");
+        return;
+      }
+      const series = await persistTopicRecord(normalized);
       await loadData();
       state.selectedTopicRecordId = normalized.id;
+      state.selectedTopicSeriesId = series.id;
       resetTopicRecordEditing();
       render();
       showToast("释放记录已保存");
@@ -3191,7 +3421,8 @@ app.addEventListener("submit", async (event) => {
       step: needsContext ? "context" : "feeling",
       subject,
       sectionKey: topic.id === "goal" ? "goal-feelings" : structure.sections[0]?.key || "default",
-      recordId: state.releaseSetup?.recordId || ""
+      recordId: state.releaseSetup?.recordId || "",
+      seriesId: state.releaseSetup?.seriesId || ""
     };
     render();
   }
@@ -3227,6 +3458,7 @@ app.addEventListener("submit", async (event) => {
     const structure = topicStructure(topic);
     const sectionKey = state.releaseSetup?.sectionKey || structure.sections[0]?.key || "default";
     const groupText = state.releaseSetup?.groupText || "";
+    const seriesId = state.releaseSetup?.seriesId || "";
     state.releaseSetup = null;
     await createStructuredReleaseSession({
       source: "topic-record",
@@ -3235,7 +3467,8 @@ app.addEventListener("submit", async (event) => {
       sectionKey,
       groupText,
       feeling: data.feeling,
-      record: isV2Record(existing) ? existing : null
+      record: isV2Record(existing) ? existing : null,
+      seriesId
     });
   }
 

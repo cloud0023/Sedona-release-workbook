@@ -57,7 +57,14 @@ https://github.com/cloud0023/Sedona-release-workbook.git
 https://cloud0023.github.io/Sedona-release-workbook/
 ```
 
-需要后续 agent 验证 `main` 推送后的 Pages 部署是否成功，以及线上是否已经加载 `v=33` 资源。
+当前本地 `main` 尚有未推送提交，包含：
+
+```text
+6131292 feat: add emotion reference to topic records
+本轮主题系列与重复释放改造
+```
+
+这些改动尚未推送。推送后需要验证 GitHub Pages 部署是否成功，以及线上是否已经加载 `v=36` 资源。
 
 ## 3. 运行与检查命令
 
@@ -101,7 +108,7 @@ python -X utf8 script.py
 
 - `index.html`
   - App 入口。
-  - 当前资源版本号为 `?v=33`。
+  - 当前资源版本号为 `?v=36`。
   - 修改 `src/app.js` 或 `styles.css` 后，如果涉及浏览器缓存，需要同步递增这里的版本号。
 
 - `src/app.js`
@@ -114,7 +121,7 @@ python -X utf8 script.py
 
 - `service-worker.js`
   - PWA 离线缓存。
-  - 当前 `CACHE_NAME` 是 `sedona-workbook-v33`。
+  - 当前 `CACHE_NAME` 是 `sedona-workbook-v36`。
   - 修改缓存资源或版本后，要与 `index.html` 资源版本同步递增。
 
 - `manifest.json`
@@ -145,6 +152,7 @@ IndexedDB 数据库名是 `sedona-workbook`。主要 store 包括：
 - `sessions`
 - `rounds`
 - `topicRecords`
+- `topicSeries`
 - `goals`
 - `actions`
 - `gains`
@@ -156,6 +164,7 @@ IndexedDB 数据库名是 `sedona-workbook`。主要 store 包括：
 ```js
 {
   id,
+  seriesId,
   topicId,
   schemaVersion: 2,
   structureType,
@@ -166,6 +175,20 @@ IndexedDB 数据库名是 `sedona-workbook`。主要 store 包括：
   updatedAt
 }
 ```
+
+`TopicSeries` 用来归拢同一主题的多次独立释放：
+
+```js
+{
+  id,
+  topicId,
+  subject,
+  createdAt,
+  updatedAt
+}
+```
+
+普通新建始终创建独立系列；只有系列详情中的“再次释放”会沿用 `seriesId`。旧结构化记录会逐条迁移到独立系列，不按相同标题合并。
 
 `ReleaseSection`：
 
@@ -255,6 +278,15 @@ IndexedDB 数据库名是 `sedona-workbook`。主要 store 包括：
    - 删除作为低频操作，通过右箭头展开。
    - “感觉好吗？”使用二段按钮写入当前 group 或 section 的 `feelsGood`。
    - 保存后返回记录详情。
+
+4. 主题记录内的情绪参考
+   - 只在 `topic.type === "emotion"` 的感受列表中显示；想要类主题不显示。
+   - 标题右侧有默认关闭的“情绪参考”入口；每条感受左侧圆形图标也是绑定当前行的快捷入口。
+   - 展开后复用九大主情绪与子情绪面板。点击主情绪会写入该主情绪；点击子情绪也写入其所属主情绪，子情绪只用于帮助辨认。
+   - 同一时间只展开一条感受的参考区。多条感受时必须用 `cardId` 定位写入目标，不能查询第一条输入框。
+   - 展开状态只存在于 UI state：`activeDraftCardId`、`emotionReferenceCardId`，不新增 IndexedDB 字段；手动输入仍正常工作。
+   - 主情绪选择会直接更新 draft card，而不是只改 DOM 输入框，以保证保存、重绘和重新编辑后不丢失。
+   - 窄屏为横向滑动情绪带，若已有选中主情绪，展开时自动滚动到该项；子情绪面板支持 Esc 关闭与可见焦点样式。
 
 视觉方向参考用户给过的三张高保真图：
 
@@ -410,6 +442,17 @@ const MATERIALS_PDF_FILE = "92年资料-释放法配套练习本7649484604780677
 - 首页增加释放资料 PDF 页面。
 - 释放资料目录从卡片改为简洁 outline。
 - 将 `main` 和 `explore/card-record-flow` 推送到 GitHub。
+- 新增主题记录内默认折叠的情绪参考，复用既有九大情绪和子情绪面板。
+- 情绪参考支持标题入口和感受行内快捷入口；子情绪会归类写入所属主情绪。
+- 验证了主情绪写入、子情绪归类、多条感受不串写，以及 320px / 572px 宽度下的展开布局。
+- 更新前端与 PWA 缓存版本至 `v=35`。
+- 创建本地提交 `6131292 feat: add emotion reference to topic records`，尚未推送。
+- 新增 `topicSeries` store，数据库版本升级到 2，并以确定性系列 ID 幂等迁移旧结构化记录。
+- 主题释放数据库改为“主题系列列表 → 系列详情 → 单次释放记录 → 分组详情”层级。
+- 系列详情支持“再次释放”与“继续本次释放”，多次释放的数据、收获和状态彼此独立。
+- 单次摘要统一为 `2/3 已释放 · 还没感觉好` 形式，并支持分区与 group 单位。
+- 系列列表按最新一次记录的 `createdAt` 排序，删除与导出已适配系列层级。
+- 更新前端与 PWA 缓存版本至 `v=36`；已验证 320px、375px、572px 卡片无横向溢出。
 
 最近提交可用以下命令查看：
 
@@ -420,8 +463,8 @@ git log --oneline -12
 ## 12. 已知风险与待确认
 
 1. GitHub Pages 部署状态需要确认。
-   - `main` 已推送到 GitHub，Pages workflow 已改回只监听 `main`。
-   - 需要检查 GitHub Actions 是否成功，以及线上是否已经是 `v=33`。
+   - Pages workflow 已改回只监听 `main`。
+   - 本地 `main` 仍有未推送提交；推送后检查 GitHub Actions 是否成功，以及线上是否已经是 `v=36`。
 
 2. PDF 资料页需要移动端真机验证。
    - 某些手机浏览器对 iframe 内嵌 PDF 支持不好。
@@ -439,6 +482,10 @@ git log --oneline -12
 5. 旧 IndexedDB 记录可能存在。
    - 旧 v1 或无 `schemaVersion` 的记录不进入新编辑/导出流程。
    - 页面不能因旧数据存在而崩溃。
+
+6. 工作区有未跟踪目录 `reference/`。
+   - 它不属于提交 `6131292`，本轮未修改或提交。
+   - 后续提交前先确认它的来源与用途，不要因为使用 `git add .` 而误提交。
 
 ## 13. 后续 agent 工作建议
 
@@ -461,7 +508,7 @@ Get-Content -Encoding utf8 HANDOFF_THEME_RECORD_REDESIGN.md
 3. 修改前先定位相关函数：
 
 ```powershell
-rg -n "TOPICS|TOPIC_STRUCTURES|ITEMIZED_TOPIC_STRUCTURES|topicRecordView|topicRecordEditPage|topicGroupEditPage|syncLinkedRecord" src\app.js
+rg -n "TOPICS|TOPIC_STRUCTURES|ITEMIZED_TOPIC_STRUCTURES|topicRecordView|topicRecordEditPage|topicGroupEditPage|emotionPicker|emotionReferenceCardId|applyEmotionSelection|syncLinkedRecord" src\app.js
 ```
 
 4. 修改后运行：
@@ -481,7 +528,8 @@ git diff --check
 6. 提交与推送：
 
 ```powershell
-git add .
+git status --short
+git add -- <明确要提交的文件>
 git commit -m "..."
 git push origin main
 ```
